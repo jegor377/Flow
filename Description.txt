@@ -1,0 +1,1 @@
+Very simple SDL2 based engine. It allows user to quickly load sprites, sound effects and it has very simple physics engine. Acronim FLOW stands for Fatally Lazy On Wednesday.
