@@ -13,50 +13,23 @@ set compiler=%main%
 set linker=%main_o%
 set remove=%main_remove%
 
-::compiler
 ::flow
-call :add_compile_files flow
+call :add_flow_files flow
 ::flow/data
-call :add_compile_files data/physical_metrics
-call :add_compile_files data/point
-call :add_compile_files data/size
-call :add_compile_files data/vector
-call :add_compile_files data/rect
+call :add_flow_files data physical_metrics
+call :add_flow_files data point
+call :add_flow_files data size
+call :add_flow_files data vector
+call :add_flow_files data rect
+::flow/entites
+call :add_flow_files entities entity
 ::flow/exceptions
-call :add_compile_files exceptions/init
-call :add_compile_files exceptions/window
+call :add_flow_files exceptions init
+call :add_flow_files exceptions window
 ::flow/logger
-call :add_compile_files logger/logger
-
-::linker
-::flow
-call :add_linker_files flow
-::flow/data
-call :add_linker_files physical_metrics
-call :add_linker_files point
-call :add_linker_files size
-call :add_linker_files vector
-call :add_linker_files rect
-::flow/exceptions
-call :add_linker_files init
-call :add_linker_files window
-::flow/logger
-call :add_linker_files logger
-
-::remove
-::flow
-call :add_remove_files flow
-::flow/data
-call :add_remove_files data/physical_metrics
-call :add_remove_files data/point
-call :add_remove_files data/size
-call :add_remove_files data/vector
-call :add_remove_files data/rect
-::flow/exceptions
-call :add_remove_files exceptions/init
-call :add_remove_files exceptions/window
-::flow/logger
-call :add_remove_files logger/logger
+call :add_flow_files logger logger
+::flow/types
+call :add_flow_files types types
 
 if [%1] == [] (
 	goto :recompile
@@ -104,4 +77,18 @@ exit /b
 
 :add_remove_files
 set remove=%remove% %lib_src%/%1.hpp.gch
+exit /b
+
+:: %1 = file path (folder name), %2 = file name
+:add_flow_files
+if [%2] NEQ [] (
+	call :add_compile_files %1/%2
+	call :add_linker_files %2
+	call :add_remove_files %1/%2
+)
+if [%2] EQU [] (
+	call :add_compile_files %1
+	call :add_linker_files %1
+	call :add_remove_files %1
+)
 exit /b

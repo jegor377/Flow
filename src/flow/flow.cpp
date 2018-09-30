@@ -3,35 +3,33 @@
 #include <string>
 
 namespace flow {
-	Flow* engine(bool is_debugging) {
-		Flow* result = new Flow;
-		result->is_debugging = is_debugging;
-		result->scr_mode = WINDOW;
-		return result;
+	Flow::Flow(bool is_debugging, bool is_fixable) {
+		this->is_debugging = is_debugging;
+		this->is_fixable = is_fixable;
+		this->scr_mode = WINDOW;
 	}
 
-	void create_window(Flow* engine, const char* w_name, Point2 pos, Size2 size, ScreenMode scr_mode) throw(exception::Window) {
-		engine->scr_mode = scr_mode;
-		engine->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, engine->scr_mode);
-		if(engine->window == NULL) {
-			throw exception::Window(engine->is_debugging, "Could not create window", SDL_GetError());
+	void Flow::create_window(const char* w_name, Point2 pos, Size2 size, ScreenMode scr_mode) throw(exception::Window) {
+		this->scr_mode = scr_mode;
+		this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
+		if(this->window == NULL) {
+			throw exception::Window(this->is_debugging, "Could not create window", SDL_GetError());
 		}
-		engine->canvas = SDL_CreateRenderer(engine->window, -1, SDL_RENDERER_ACCELERATED);
-		if(engine->canvas == NULL) {
+		this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+		if(this->canvas == NULL) {
 			const char* error_msg = SDL_GetError();
 			// try to fix a problem
-			engine->canvas = SDL_CreateRenderer(engine->window, -1, SDL_RENDERER_SOFTWARE);
-			if(engine->canvas != NULL) {
+			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_SOFTWARE);
+			if(this->canvas != NULL) {
 				log::sdl_fix_warn("SDL_CreateRenderer", "Creating renderer as software fallback (SDL_RENDERER_SOFTWARE)", error_msg);
 				return;
 			}
-			throw exception::Window(engine->is_debugging, "Could not create canvas (renderer)", error_msg);
+			throw exception::Window(this->is_debugging, "Could not create canvas (renderer)", error_msg);
 		}
 	}
 
-	void destroy_engine(Flow* engine) {
-
-		SDL_DestroyWindow(engine->window);
+	Flow::~Flow() {
+		SDL_DestroyWindow(this->window);
 	}
 
 	void init(int sdl_support_flags) throw(exception::Init) {

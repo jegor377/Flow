@@ -7,18 +7,18 @@ const bool DEBUG_MODE = true;
 
 int main(int argc, char** argv) {
 	try {
-		flow::init(SDL_INIT_EVERYTHING);
+		flow::init();
 		atexit(flow::quit);
 
-		flow::Flow* engine = flow::engine(DEBUG_MODE);
+		flow::Flow engine(DEBUG_MODE);
 
-		flow::create_window(engine, "Test Window:)");
+		engine.create_window("Test Window:))");
 		flow::log::info("Window created.");
-
-		flow:destroy_engine(engine);
-		delete engine;
 	} catch(flow::exception::Init& e) {
 		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
-	} catch(flow::exception::Window& e) {}
+		return 1;
+	} catch(flow::exception::Window& e) {
+		return 1;
+	}
 	return 0;
 }

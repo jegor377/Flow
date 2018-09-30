@@ -5,6 +5,8 @@
 #include "./data/physical_metrics.hpp"
 #include "./exceptions/init.hpp"
 #include "./exceptions/window.hpp"
+#include "./entities/entity.hpp"
+#include "./types/types.hpp"
 
 namespace flow {
 	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -15,16 +17,20 @@ namespace flow {
 		WINDOW = SDL_WINDOW_OPENGL
 	};
 
-	struct Flow {
+	class Flow {
+		Window window;
+		Renderer canvas;
+		Entities enitites;
+	public:
 		bool is_debugging;
+		bool is_fixable;
 		ScreenMode scr_mode;
-		SDL_Window* window;
-		SDL_Renderer* canvas;
-	};
 
-	Flow* engine(bool is_debugging=false);
-	void create_window(Flow* engine, const char* w_name = "sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) throw(exception::Window);
-	void destroy_engine(Flow* engine);
+		Flow(bool is_debugging=false, bool is_fixable=true);
+		~Flow();
+
+		void create_window(const char* w_name = "sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) throw(exception::Window);
+	};
 
 	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS) throw(exception::Init);
 	void quit();
