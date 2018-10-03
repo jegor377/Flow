@@ -19,13 +19,13 @@ else
 	elif [ "$1" = "-cx" ]; then
 		rm $remove_o $remove_gch $bin
 	else
-		echo ./recompile [-c]
-		echo \n
-		echo Script for recompiling and cleaning the project.
-		echo \n
-		echo When runned as recompile without any argument, script just recompiles the project.
-		echo \n
-		echo -c 		Cleans compile files without executable.
-		echo -cx 		Cleans compile files with executable.
+		echo "recompile [-c] [-cx]"
+		echo
+		echo "Script for recompiling and cleaning the project."
+		echo
+		echo "When runned as recompile without any argument, script just recompiles the project."
+		echo
+		echo "-c 		Cleans compile files without executable."
+		echo "-cx 		Cleans compile files with executable."
 	fi
 fi

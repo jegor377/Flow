@@ -41,7 +41,7 @@ if [%1] == [-cx] (
 	goto :cleanx
 )
 
-echo recompile [-c]
+echo recompile [-c] [-cx]
 echo.
 echo Script for recompiling and cleaning the project.
 echo.
