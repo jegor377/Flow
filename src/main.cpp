@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
 
 		engine.create_window("Test Window:))");
 		flow::log::info("Window created.");
+		SDL_Delay(5000);
 	} catch(flow::exception::Init& e) {
 		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
 		return 1;
