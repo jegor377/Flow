@@ -1,4 +1,5 @@
 @echo off
+:: Script created by Igor Santarek MIT 2018. Works only with cygwin or msys. Can be easly converted to pure batch script.
 
 set bin_dir=./bin
 set binary_name=bin
@@ -54,6 +55,7 @@ exit /b
 :recompile
 g++ -c %compiler% -std=c++11
 if %errorlevel% EQU 0 (
+	call :create_bin_dir
 	g++ -o ./%bin_dir%/%binary_name% %linker% -lmingw32 -lSDL2main -lSDL2
 )
 exit /b
@@ -91,4 +93,8 @@ if [%2] EQU [] (
 	call :add_linker_files %1
 	call :add_remove_files %1
 )
+exit /b
+
+:create_bin_dir
+if NOT EXIST %bin_dir% mkdir %bin_dir%
 exit /b

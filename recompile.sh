@@ -1,6 +1,12 @@
 #!/bin/bash
 bin='bin/bin'
 
+create_bin_dir() {
+	if [ ! -d "bin" ]; then
+		mkdir bin
+	fi
+}
+
 compile_cpp=$(find ./ -type f -name "*.cpp" | xargs)
 compile_hpp=$(find ./ -type f -name "*.hpp" | xargs)
 
@@ -11,6 +17,7 @@ if [ -z "$1" ]; then
 	g++ -c $compile_cpp $compile_hpp -std=c++11
 	if [ $? -eq 0 ]; then
 		compile_o=$(find ./ -type f -name "*.o" | xargs)
+		create_bin_dir
 		g++ -o ./$bin $compile_o -lSDL2main -lSDL2
 	fi
 else

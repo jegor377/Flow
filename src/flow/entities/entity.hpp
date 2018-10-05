@@ -10,11 +10,16 @@ namespace flow {
 		Point pos;
 		Size size;
 		
-		const char* name;
-		const char* group;
+		char* name;
+		char* group;
 	public:
-		virtual void update(int delta) = 0;
-		virtual void render(SDL_Renderer* canvas) = 0;
-		virtual void events(SDL_Event* event) = 0;
+		Entity();
+		Entity(Point pos, Size size, char* name, char* group);
+		Entity(const Entity& copy_entity);
+
+		virtual void update(double delta) = 0;
+		void render(SDL_Renderer* canvas);
+		virtual void event(SDL_Event* event) = 0;
+		virtual void collision(Entity& body) = 0;
 	};
 }

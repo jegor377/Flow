@@ -1,5 +1,6 @@
 #include <iostream>
 #include "flow/flow.hpp"
+#include "sample/player.hpp"
 
 using namespace std;
 
@@ -10,10 +11,14 @@ int main(int argc, char** argv) {
 		flow::init();
 		atexit(flow::quit);
 
-		flow::Flow engine(DEBUG_MODE);
+		flow::Flow engine(DEBUG_MODE, false);
 
 		engine.create_window("Test Window:))");
 		flow::log::info("Window created.");
+
+		game::Player player;
+		engine.add_entity(&player);
+		
 		SDL_Delay(5000);
 	} catch(flow::exception::Init& e) {
 		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
