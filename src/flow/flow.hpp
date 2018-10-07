@@ -1,13 +1,25 @@
 #pragma once
 
+#include <vector>
 #include <string>
+#include <exception>
 #include <SDL2/SDL.h>
-#include "./logger/logger.hpp"
-#include "./data/physical_metrics.hpp"
-#include "./exceptions/init.hpp"
-#include "./exceptions/window.hpp"
-#include "./entities/entity.hpp"
-#include "./types/types.hpp"
+
+// Wrapper CPP imports:
+//physical metrics
+@import point;
+@import vector;
+@import size;
+@import rect;
+//entities
+@import entity;
+//types
+@import types;
+//logger
+@import logger;
+//exceptions
+@import init;
+@import window;
 
 namespace flow {
 	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -21,27 +33,82 @@ namespace flow {
 	class Flow {
 		Window window;
 		Renderer canvas;
-		Entities enitites;
+		EntityCollector entities;
 	public:
 		bool is_debugging;
 		bool is_fixable;
 		ScreenMode scr_mode;
 
-		Flow(bool is_debugging=false, bool is_fixable=true);
-		~Flow();
+		Flow(bool is_debugging=false, bool is_fixable=true) {
+			this->is_debugging = is_debugging;
+			this->is_fixable = is_fixable;
+			this->scr_mode = WINDOW;
+		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) throw(exception::Window);
-		void add_entity(Entity* entity);
+		~Flow() {
+			SDL_DestroyWindow(this->window);
+		}
+
+		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) throw(exception::Window) {
+			this->scr_mode = scr_mode;
+			this->initialize_window(w_name, pos, size);
+			this->initialize_canvas();
+		}
+
+		void add_entity(Entity* entity) {
+			entities.add(entity);
+		}
+
+		void game_loop() {
+			;
+		}
 
 	private:
 		//initializing methods.
-		void initialize_window(const char* w_name, Point2& pos, Size2& size) throw(exception::Window);
-		void initialize_canvas() throw(exception::Window);
+		void initialize_window(const char* w_name, Point2& pos, Size2& size) throw(exception::Window) {
+			this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
+			if(this->window == NULL) {
+				throw exception::Window(this->is_debugging, "Could not create window", SDL_GetError());
+			}
+		}
+
+		void initialize_canvas() throw(exception::Window) {
+			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+			if(this->canvas == NULL) {
+				const char* error_msg = SDL_GetError();
+				// try to fix a problem
+				if(!this->fix_create_canvas(error_msg)) {
+					throw exception::Window(this->is_debugging, "Could not create canvas (renderer)", error_msg);
+				}
+			}
+		}
 
 		//fix methods. Return value says if the problem was fixed.
-		bool fix_create_canvas(const char* error_msg);
+		bool fix_create_canvas(const char* error_msg) {
+			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_SOFTWARE);
+			if(this->canvas != NULL) {
+				log::sdl_fix_warn("SDL_CreateRenderer", "Creating renderer as software fallback (SDL_RENDERER_SOFTWARE)", error_msg);
+				return true;
+			}
+			return false;
+		}
 	};
 
-	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, bool is_fixable=true) throw(exception::Init);
-	void quit();
+	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, bool is_fixable=true) throw(exception::Init) {
+		if(SDL_Init(sdl_support_flags) < 0) {
+			const char* error_msg = SDL_GetError();
+			// try to fix a problem. This fix is not in outer method because it's not in a class and it's not needed.
+			if(is_fixable) {
+				if(SDL_Init(DEFAULT_INIT_FLAGS) >= 0) {
+					log::sdl_fix_warn("SDL_Init", "Initing SDL2 with default flags (SDL_INIT_VIDEO|SDL_INIT_AUDIO)", error_msg);
+					return;
+				}
+			}
+			throw exception::Init(error_msg);
+		}
+	}
+
+	void quit() {
+		SDL_Quit();
+	}
 }

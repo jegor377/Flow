@@ -1,5 +1,3 @@
-#include "./logger.hpp"
-
 namespace flow {
 	namespace log {
 		void info(std::string msg) {
@@ -19,11 +17,13 @@ namespace flow {
 		}
 
 		// special functions
+		// logs warn when sdl reported error and flow fixed it somehow.
 		void sdl_fix_warn(std::string error_source, std::string fix_way, const char* sdl_error_msg) {
 			std::string msg = error_source+" reported error (\""+std::string(sdl_error_msg)+"\"). It has been fixed. Fix way: "+fix_way+".";
 			warn(msg);
 		}
 
+		// logs flow debug if is_debugging flag is set.
 		void flow_debug(bool is_debugging, std::string msg) {
 			if(is_debugging) {
 				debug(msg);

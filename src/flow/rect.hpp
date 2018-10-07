@@ -1,6 +1,8 @@
-#include "./rect.hpp"
-
 namespace flow {
+	struct Rect2 : Point2, Size2 {};
+
+	struct Rect : Point, Size {};
+
 	Rect2 new_rect2(int x, int y, int w, int h) {
 		flow::Rect2 result = {};
 		result.x = x;

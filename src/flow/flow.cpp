@@ -7,6 +7,10 @@ namespace flow {
 		this->scr_mode = WINDOW;
 	}
 
+	Flow::~Flow() {
+		SDL_DestroyWindow(this->window);
+	}
+
 	void Flow::create_window(const char* w_name, Point2 pos, Size2 size, ScreenMode scr_mode) throw(exception::Window) {
 		this->scr_mode = scr_mode;
 		this->initialize_window(w_name, pos, size);
@@ -14,11 +18,11 @@ namespace flow {
 	}
 
 	void Flow::add_entity(Entity* entity) {
-		;
+		entities.add(entity);
 	}
 
-	Flow::~Flow() {
-		SDL_DestroyWindow(this->window);
+	void Flow::game_loop() {
+		;
 	}
 
 	void init(int sdl_support_flags, bool is_fixable) throw(exception::Init) {

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "flow/flow.hpp"
+#include "flow.hpp"
 #include "sample/player.hpp"
 
 using namespace std;
