@@ -40,7 +40,7 @@ mv flow.hpp src
 g++ -c %compiler% -std=c++11
 if %errorlevel% EQU 0 (
 	call :create_bin_dir
-	g++ -o ./%bin_dir%/%binary_name% %linker% -lmingw32 -lSDL2main -lSDL2
+	g++ -o ./%bin_dir%/%binary_name% %linker% -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
 )
 exit /b
 

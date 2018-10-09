@@ -5,6 +5,7 @@
 #include <cstring>
 #include <exception>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 // Wrapper CPP imports:
 //physical metrics
@@ -207,7 +208,8 @@ namespace flow {
 		public:
 			SpriteLoad(const char* name, const char* path, const char* sdl_err_msg) {
 				char* err_msg = new char[strlen("Cannot to load sprite with name \"\" and path \"\". ")+strlen(name)+strlen(path)+strlen(sdl_err_msg)+1];
-				strcat(err_msg, "Cannot to load sprite with name \"");
+				const char* init_str = "Cannot to load sprite with name \"";
+				strcpy(err_msg, init_str);
 				strcat(err_msg, name);
 				strcat(err_msg, "\" and path \"");
 				strcat(err_msg, path);
@@ -278,7 +280,8 @@ namespace flow {
 			}
 		}
 	public:
-		friend void load_sprite(Sprite* sprite);
+		friend class SpriteCollector;
+		void load_sprite(Sprite* sprite);
 		friend void draw(Sprite* sprite);
 	};
 
@@ -320,6 +323,7 @@ namespace flow {
 namespace flow {
 	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	const int DEFAULT_INIT_FLAGS = SDL_INIT_VIDEO|SDL_INIT_AUDIO;
+	const int DEFAULT_IMG_INIT_FLAGS = IMG_INIT_PNG|IMG_INIT_JPG;
 
 	enum ScreenMode {
 		FULLSCREEN = SDL_WINDOW_FULLSCREEN,
@@ -347,6 +351,7 @@ namespace flow {
 
 		~Flow() {
 			SDL_DestroyWindow(this->window);
+			delete this->sprite_collector;
 		}
 
 		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
@@ -398,21 +403,37 @@ namespace flow {
 		}
 	};
 
-	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, bool is_fixable=true) {// throw(exception::Init)
+	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, int img_init_flags=DEFAULT_IMG_INIT_FLAGS, bool is_fixable=true) {// throw(exception::Init)
+		// Initing SDL2
 		if(SDL_Init(sdl_support_flags) < 0) {
 			const char* error_msg = SDL_GetError();
+			bool is_problem_fixed = false;
 			// try to fix a problem. This fix is not in outer method because it's not in a class and it's not needed.
 			if(is_fixable) {
 				if(SDL_Init(DEFAULT_INIT_FLAGS) >= 0) {
 					log::sdl_fix_warn("SDL_Init", "Initing SDL2 with default flags (SDL_INIT_VIDEO|SDL_INIT_AUDIO)", error_msg);
-					return;
+					is_problem_fixed = true;
 				}
 			}
-			throw exception::Init(error_msg);
+			if(!is_problem_fixed) throw exception::Init(error_msg);
+		}
+		// Initing SDL2_image
+		if(!(IMG_Init(img_init_flags) & img_init_flags)) {
+			const char* error_msg = IMG_GetError();
+			bool is_problem_fixed = false;
+			// try to fix a problem by initing sdl2_image with default init flags.
+			if(is_fixable) {
+				if(IMG_Init(DEFAULT_IMG_INIT_FLAGS) & DEFAULT_IMG_INIT_FLAGS) {
+					log::sdl_fix_warn("IMG_Init", "Initing SDL2_image with default flags (IMG_INIT_PNG|IMG_INIT_JPG)", error_msg);
+					is_problem_fixed = true;
+				}
+			}
+			if(!is_problem_fixed) throw exception::Init(error_msg);
 		}
 	}
 
 	void quit() {
+		IMG_Quit();
 		SDL_Quit();
 	}
 }

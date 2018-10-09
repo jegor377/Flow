@@ -22,7 +22,8 @@ namespace flow {
 			}
 		}
 	public:
-		friend void load_sprite(Sprite* sprite);
+		friend class SpriteCollector;
+		void load_sprite(Sprite* sprite);
 		friend void draw(Sprite* sprite);
 	};
 

@@ -6,7 +6,8 @@ namespace flow {
 		public:
 			SpriteLoad(const char* name, const char* path, const char* sdl_err_msg) {
 				char* err_msg = new char[strlen("Cannot to load sprite with name \"\" and path \"\". ")+strlen(name)+strlen(path)+strlen(sdl_err_msg)+1];
-				strcat(err_msg, "Cannot to load sprite with name \"");
+				const char* init_str = "Cannot to load sprite with name \"";
+				strcpy(err_msg, init_str);
 				strcat(err_msg, name);
 				strcat(err_msg, "\" and path \"");
 				strcat(err_msg, path);

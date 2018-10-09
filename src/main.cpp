@@ -14,6 +14,8 @@ int main(int argc, char** argv) {
 		engine.create_window("Test Window:))");
 		flow::log::info("Window created.");
 
+		engine.add_sprite("test", "test.png");
+
 		game::Player player;
 		engine.add_entity(&player);
 		
@@ -22,6 +24,9 @@ int main(int argc, char** argv) {
 		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
 		return 1;
 	} catch(flow::exception::Window& e) {
+		return 1;
+	} catch(flow::exception::SpriteLoad& e) {
+		flow::log::error(e.what());
 		return 1;
 	}
 	return 0;
