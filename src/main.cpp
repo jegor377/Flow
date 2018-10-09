@@ -2,8 +2,6 @@
 #include "flow.hpp"
 #include "sample/player.hpp"
 
-using namespace std;
-
 const bool DEBUG_MODE = true;
 
 int main(int argc, char** argv) {
@@ -19,7 +17,7 @@ int main(int argc, char** argv) {
 		game::Player player;
 		engine.add_entity(&player);
 		
-		SDL_Delay(5000);
+		SDL_Delay(2000);
 	} catch(flow::exception::Init& e) {
 		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
 		return 1;

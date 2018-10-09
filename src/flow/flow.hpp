@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <cstring>
 #include <exception>
 #include <SDL2/SDL.h>
 
@@ -18,8 +19,12 @@
 //logger
 @import logger;
 //exceptions
-@import init;
-@import window;
+@import init_err;
+@import window_err;
+@import spriteload_err;
+//collectors
+@import entity_collector;
+@import sprite_collector;
 
 namespace flow {
 	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -33,7 +38,9 @@ namespace flow {
 	class Flow {
 		Window window;
 		Renderer canvas;
-		EntityCollector entities;
+		EntityCollector entity_collector;
+		SpriteCollector* sprite_collector;
+
 	public:
 		bool is_debugging;
 		bool is_fixable;
@@ -43,20 +50,26 @@ namespace flow {
 			this->is_debugging = is_debugging;
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
+
+			this->sprite_collector = new SpriteCollector(this->canvas);
 		}
 
 		~Flow() {
 			SDL_DestroyWindow(this->window);
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) throw(exception::Window) {
+		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas();
 		}
 
 		void add_entity(Entity* entity) {
-			entities.add(entity);
+			entity_collector.add(entity);
+		}
+
+		void add_sprite(const char* name, const char* path) {
+			sprite_collector->add(name, path);
 		}
 
 		void game_loop() {
@@ -65,14 +78,14 @@ namespace flow {
 
 	private:
 		//initializing methods.
-		void initialize_window(const char* w_name, Point2& pos, Size2& size) throw(exception::Window) {
+		void initialize_window(const char* w_name, Point2& pos, Size2& size) {// throw(exception::Window)
 			this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
 			if(this->window == NULL) {
 				throw exception::Window(this->is_debugging, "Could not create window", SDL_GetError());
 			}
 		}
 
-		void initialize_canvas() throw(exception::Window) {
+		void initialize_canvas() {//throw(exception::Window)
 			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
@@ -94,7 +107,7 @@ namespace flow {
 		}
 	};
 
-	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, bool is_fixable=true) throw(exception::Init) {
+	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, bool is_fixable=true) {// throw(exception::Init)
 		if(SDL_Init(sdl_support_flags) < 0) {
 			const char* error_msg = SDL_GetError();
 			// try to fix a problem. This fix is not in outer method because it's not in a class and it's not needed.

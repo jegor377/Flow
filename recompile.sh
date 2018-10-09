@@ -1,30 +1,30 @@
 #!/bin/bash
 bin='bin/bin'
 
+lib_src='./src/flow'
+
+compiler='./src/main.cpp'
+linker='./main.o'
+
 create_bin_dir() {
 	if [ ! -d "bin" ]; then
 		mkdir bin
 	fi
 }
 
-compile_cpp=$(find ./ -type f -name "*.cpp" | xargs)
-compile_hpp=$(find ./ -type f -name "*.hpp" | xargs)
-
-remove_o=$(find ./ -type f -name "*.o" | xargs)
-remove_gch=$(find ./ -type f -name "*.gch" | xargs)
-
 if [ -z "$1" ]; then
-	g++ -c $compile_cpp $compile_hpp -std=c++11
+	wcpp $lib_src flow >/dev/null
+	mv flow.hpp src
+	g++ -c $compiler -std=c++11
 	if [ $? -eq 0 ]; then
-		compile_o=$(find ./ -type f -name "*.o" | xargs)
 		create_bin_dir
-		g++ -o ./$bin $compile_o -lSDL2main -lSDL2
+		g++ -o ./$bin $linker -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
 	fi
 else
 	if [ "$1" = "-c" ]; then
-		rm $remove_o $remove_gch
+		rm $linker
 	elif [ "$1" = "-cx" ]; then
-		rm $remove_o $remove_gch $bin
+		rm $linker $bin
 	else
 		echo "recompile [-c] [-cx]"
 		echo

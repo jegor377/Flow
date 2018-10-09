@@ -21,10 +21,6 @@ namespace flow {
 			strcpy(this->group, copy_entity.group);
 		}
 		
-		void render(SDL_Renderer* canvas) {
-			;
-		}
-
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event* event) = 0;
 		virtual void collision(Entity& body) = 0;

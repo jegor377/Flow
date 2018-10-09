@@ -9,7 +9,6 @@ set main_o=main.o
 set main_remove= 
 
 set lib_src=./src/flow
-set game_src=./src/sample
 
 set compiler=%main%
 set linker=%main_o%
