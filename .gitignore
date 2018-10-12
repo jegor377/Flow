@@ -35,3 +35,6 @@
 *.jpg
 *.png
 *.bmp
+
+# All bin files
+./bin

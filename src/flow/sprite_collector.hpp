@@ -5,6 +5,9 @@ namespace flow {
 		const char* path;
 
 	public:
+		Rect2 source_section;
+		Rect2 destination_section;
+
 		Sprite(const char* name, const char* path) {
 			this->texture = NULL;
 			this->name = name;
@@ -23,28 +26,38 @@ namespace flow {
 		}
 	public:
 		friend class SpriteCollector;
-		void load_sprite(Sprite* sprite);
+
 		friend void draw(Sprite* sprite);
+
+		Size2* get_size() {
+			int w, h;
+			SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
+			return new Size2(w, h);
+		}
+
+		const char* get_name() {
+			return this->name;
+		}
+
+		const char* get_path() {
+			return this->path;
+		}
 	};
 
 	class SpriteCollector {
 		std::vector<Sprite*> sprites;
-		Renderer canvas;
 	public:
 
-		SpriteCollector(Renderer canvas) {
-			this->canvas = canvas;
-		}
 		~SpriteCollector() {
 			for(auto sprite : sprites) {
 				delete sprite;
 			}
 		}
 
-		void add(const char* name, const char* path) {
+		void add(const Renderer canvas, const char* name, const char* path) {
 			auto sprite = new Sprite(name, path);
 			this->sprites.push_back(sprite);
-			this->load_sprite(sprite);
+			this->load_sprite(canvas, sprite);
 		}
 
 		void remove(const char* name) {
@@ -55,8 +68,8 @@ namespace flow {
 			;
 		}
 	private:
-		void load_sprite(Sprite* sprite) {
-			sprite->texture = IMG_LoadTexture(this->canvas, sprite->path);
+		void load_sprite(const Renderer canvas, Sprite* sprite) {
+			sprite->texture = IMG_LoadTexture(canvas, sprite->path);
 			if(sprite->texture == NULL) throw exception::SpriteLoad(sprite->name, sprite->path, SDL_GetError());
 		}
 	};

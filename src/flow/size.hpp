@@ -1,27 +1,20 @@
 namespace flow {
-	struct Size2 {
+	class Size2 {
+	public:
 		int w; // width
 		int h; // height
+		Size2(int w=0, int h=0) {
+			this->w=w;
+			this->h=h;
+		}
 	};
 
-	struct Size {
-		int w; // width
-		int h; // height
+	class Size : public Size2 {
+	public:
 		int l; // length
+
+		Size(int w=0, int h=0, int l=0) : Size2(w, h) {
+			this->l=l;
+		}
 	};
-
-	Size2 new_size2(int w, int h) {
-		Size2 result = {};
-		result.w = w;
-		result.h = h;
-		return result;
-	}
-
-	Size new_size(int w, int h, int l) {
-		Size result = {};
-		result.w = w;
-		result.h = h;
-		result.l = l;
-		return result;
-	}
 }

@@ -2,6 +2,12 @@ namespace flow {
 	class EntityCollector {
 		EntityList entities;
 	public:
+
+		~EntityCollector() {
+			for(auto entity : entities) {
+				delete entity;
+			}
+		}
 		
 		void add(Entity* entity) {
 			this->entities.push_back(entity);

@@ -1,25 +1,20 @@
 namespace flow {
-	struct Point2 {
-		int x=0;
-		int y=0;
+	class Point2 {
+	public:
+		int x;
+		int y;
+
+		Point2(int x=0, int y=0) {
+			this->x=x;
+			this->y=y;
+		}
 	};
 
-	struct Point : Point2 {
+	class Point : public Point2 {
+	public:
 		int z=0;
+		Point(int x=0, int y=0, int z=0) : Point2(x, y) {
+			this->z = z;
+		}
 	};
-
-	Point2 new_point2(int x, int y) {
-		Point result = {};
-		result.x = x;
-		result.y = y;
-		return result;
-	}
-
-	Point new_point(int x, int y, int z) {
-		Point result = {};
-		result.x = x;
-		result.y = y;
-		result.z = z;
-		return result;
-	}
 }

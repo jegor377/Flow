@@ -35,7 +35,7 @@ echo -cx 		Cleans compile files with executable.
 exit /b
 
 :recompile
-wcpp %lib_src% flow
+wcpp %lib_src% flow >nul
 mv flow.hpp src
 g++ -c %compiler% -std=c++11
 if %errorlevel% EQU 0 (

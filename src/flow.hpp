@@ -10,92 +10,89 @@
 // Wrapper CPP imports:
 //physical metrics
 namespace flow {
-	struct Point2 {
-		int x=0;
-		int y=0;
+	class Point2 {
+	public:
+		int x;
+		int y;
+
+		Point2(int x=0, int y=0) {
+			this->x=x;
+			this->y=y;
+		}
 	};
 
-	struct Point : Point2 {
+	class Point : public Point2 {
+	public:
 		int z=0;
+		Point(int x=0, int y=0, int z=0) : Point2(x, y) {
+			this->z = z;
+		}
 	};
-
-	Point2 new_point2(int x, int y) {
-		Point result = {};
-		result.x = x;
-		result.y = y;
-		return result;
-	}
-
-	Point new_point(int x, int y, int z) {
-		Point result = {};
-		result.x = x;
-		result.y = y;
-		result.z = z;
-		return result;
-	}
 }
 namespace flow {
-	struct Vector : Point {};
+	class Vector : public Point {
+		Vector(int x=0, int y=0, int z=0) : Point(x, y, z) {};
+	};
 }
 namespace flow {
-	struct Size2 {
+	class Size2 {
+	public:
 		int w; // width
 		int h; // height
+		Size2(int w=0, int h=0) {
+			this->w=w;
+			this->h=h;
+		}
 	};
 
-	struct Size {
-		int w; // width
-		int h; // height
+	class Size : public Size2 {
+	public:
 		int l; // length
+
+		Size(int w=0, int h=0, int l=0) : Size2(w, h) {
+			this->l=l;
+		}
 	};
-
-	Size2 new_size2(int w, int h) {
-		Size2 result = {};
-		result.w = w;
-		result.h = h;
-		return result;
-	}
-
-	Size new_size(int w, int h, int l) {
-		Size result = {};
-		result.w = w;
-		result.h = h;
-		result.l = l;
-		return result;
-	}
 }
 namespace flow {
-	struct Rect2 : Point2, Size2 {};
+	enum RectMode {
+		SECTION = 0,
+		FULL = 1
+	};
 
-	struct Rect : Point, Size {};
+	class Rect2 : public Point2, Size2 {
+		SDL_Rect sdl_representation;
+	public:
+		RectMode mode;
 
-	Rect2 new_rect2(int x, int y, int w, int h) {
-		flow::Rect2 result = {};
-		result.x = x;
-		result.y = y;
-		result.w = w;
-		result.h = h;
-		return result;
-	}
+		Rect2(int x=0, int y=0, int w=0, int h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
+			this->mode = mode;
+		};
 
-	Rect new_rect(int x, int y, int z, int w, int h, int l) {
-		flow::Rect result = {};
-		result.x = x;
-		result.y = y;
-		result.z = z;
-		result.w = w;
-		result.h = h;
-		result.l = l;
-		return result;
-	}
+		SDL_Rect* get_sdl_rect() {
+			if(this->mode == SECTION) {
+				this->sdl_representation.x = this->x;
+				this->sdl_representation.y = this->y;
+				this->sdl_representation.w = this->w;
+				this->sdl_representation.h = this->h;
+				return &this->sdl_representation;
+			}
+			return NULL;
+		}
+	};
 
-	bool is_colliding(Rect& src, Rect& dst) {
-		return false;
-	}
+	struct Rect : public Point, Size {
+	public:
+		Rect(int x=0, int y=0, int z=0, int w=0, int h=0, int l=0) : Point(x, y, z), Size(w, h, l) {};
 
-	bool is_colliding_pwr(Point& src, Rect& dst) {
-		return true;
-	}
+		bool is_colliding(const Rect& other) {
+			return false;
+		}
+
+		bool is_colliding_with_point(const Point& pt) {
+			return false;
+		}
+	};
 }
 //entities
 namespace flow {
@@ -233,6 +230,12 @@ namespace flow {
 	class EntityCollector {
 		EntityList entities;
 	public:
+
+		~EntityCollector() {
+			for(auto entity : entities) {
+				delete entity;
+			}
+		}
 		
 		void add(Entity* entity) {
 			this->entities.push_back(entity);
@@ -263,6 +266,9 @@ namespace flow {
 		const char* path;
 
 	public:
+		Rect2 source_section;
+		Rect2 destination_section;
+
 		Sprite(const char* name, const char* path) {
 			this->texture = NULL;
 			this->name = name;
@@ -281,28 +287,38 @@ namespace flow {
 		}
 	public:
 		friend class SpriteCollector;
-		void load_sprite(Sprite* sprite);
+
 		friend void draw(Sprite* sprite);
+
+		Size2* get_size() {
+			int w, h;
+			SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
+			return new Size2(w, h);
+		}
+
+		const char* get_name() {
+			return this->name;
+		}
+
+		const char* get_path() {
+			return this->path;
+		}
 	};
 
 	class SpriteCollector {
 		std::vector<Sprite*> sprites;
-		Renderer canvas;
 	public:
 
-		SpriteCollector(Renderer canvas) {
-			this->canvas = canvas;
-		}
 		~SpriteCollector() {
 			for(auto sprite : sprites) {
 				delete sprite;
 			}
 		}
 
-		void add(const char* name, const char* path) {
+		void add(const Renderer canvas, const char* name, const char* path) {
 			auto sprite = new Sprite(name, path);
 			this->sprites.push_back(sprite);
-			this->load_sprite(sprite);
+			this->load_sprite(canvas, sprite);
 		}
 
 		void remove(const char* name) {
@@ -313,15 +329,15 @@ namespace flow {
 			;
 		}
 	private:
-		void load_sprite(Sprite* sprite) {
-			sprite->texture = IMG_LoadTexture(this->canvas, sprite->path);
+		void load_sprite(const Renderer canvas, Sprite* sprite) {
+			sprite->texture = IMG_LoadTexture(canvas, sprite->path);
 			if(sprite->texture == NULL) throw exception::SpriteLoad(sprite->name, sprite->path, SDL_GetError());
 		}
 	};
 }
 
 namespace flow {
-	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	const Point2 WINDOW_CENTER(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	const int DEFAULT_INIT_FLAGS = SDL_INIT_VIDEO|SDL_INIT_AUDIO;
 	const int DEFAULT_IMG_INIT_FLAGS = IMG_INIT_PNG|IMG_INIT_JPG;
 
@@ -334,7 +350,7 @@ namespace flow {
 		Window window;
 		Renderer canvas;
 		EntityCollector entity_collector;
-		SpriteCollector* sprite_collector;
+		SpriteCollector sprite_collector;
 
 	public:
 		bool is_debugging;
@@ -345,16 +361,14 @@ namespace flow {
 			this->is_debugging = is_debugging;
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
-
-			this->sprite_collector = new SpriteCollector(this->canvas);
 		}
 
 		~Flow() {
+			SDL_DestroyRenderer(this->canvas);
 			SDL_DestroyWindow(this->window);
-			delete this->sprite_collector;
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
+		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas();
@@ -365,7 +379,7 @@ namespace flow {
 		}
 
 		void add_sprite(const char* name, const char* path) {
-			sprite_collector->add(name, path);
+			sprite_collector.add(this->canvas, name, path);
 		}
 
 		void game_loop() {
@@ -382,7 +396,7 @@ namespace flow {
 		}
 
 		void initialize_canvas() {//throw(exception::Window)
-			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
 				// try to fix a problem

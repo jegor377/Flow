@@ -28,7 +28,7 @@
 @import sprite_collector;
 
 namespace flow {
-	const Point2 WINDOW_CENTER = new_point2(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	const Point2 WINDOW_CENTER(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	const int DEFAULT_INIT_FLAGS = SDL_INIT_VIDEO|SDL_INIT_AUDIO;
 	const int DEFAULT_IMG_INIT_FLAGS = IMG_INIT_PNG|IMG_INIT_JPG;
 
@@ -41,7 +41,7 @@ namespace flow {
 		Window window;
 		Renderer canvas;
 		EntityCollector entity_collector;
-		SpriteCollector* sprite_collector;
+		SpriteCollector sprite_collector;
 
 	public:
 		bool is_debugging;
@@ -52,16 +52,14 @@ namespace flow {
 			this->is_debugging = is_debugging;
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
-
-			this->sprite_collector = new SpriteCollector(this->canvas);
 		}
 
 		~Flow() {
+			SDL_DestroyRenderer(this->canvas);
 			SDL_DestroyWindow(this->window);
-			delete this->sprite_collector;
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=new_size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
+		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas();
@@ -72,7 +70,7 @@ namespace flow {
 		}
 
 		void add_sprite(const char* name, const char* path) {
-			sprite_collector->add(name, path);
+			sprite_collector.add(this->canvas, name, path);
 		}
 
 		void game_loop() {
@@ -89,7 +87,7 @@ namespace flow {
 		}
 
 		void initialize_canvas() {//throw(exception::Window)
-			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
 				// try to fix a problem

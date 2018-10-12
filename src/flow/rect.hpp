@@ -1,33 +1,40 @@
 namespace flow {
-	struct Rect2 : Point2, Size2 {};
+	enum RectMode {
+		SECTION = 0,
+		FULL = 1
+	};
 
-	struct Rect : Point, Size {};
+	class Rect2 : public Point2, Size2 {
+		SDL_Rect sdl_representation;
+	public:
+		RectMode mode;
 
-	Rect2 new_rect2(int x, int y, int w, int h) {
-		flow::Rect2 result = {};
-		result.x = x;
-		result.y = y;
-		result.w = w;
-		result.h = h;
-		return result;
-	}
+		Rect2(int x=0, int y=0, int w=0, int h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
+			this->mode = mode;
+		};
 
-	Rect new_rect(int x, int y, int z, int w, int h, int l) {
-		flow::Rect result = {};
-		result.x = x;
-		result.y = y;
-		result.z = z;
-		result.w = w;
-		result.h = h;
-		result.l = l;
-		return result;
-	}
+		SDL_Rect* get_sdl_rect() {
+			if(this->mode == SECTION) {
+				this->sdl_representation.x = this->x;
+				this->sdl_representation.y = this->y;
+				this->sdl_representation.w = this->w;
+				this->sdl_representation.h = this->h;
+				return &this->sdl_representation;
+			}
+			return NULL;
+		}
+	};
 
-	bool is_colliding(Rect& src, Rect& dst) {
-		return false;
-	}
+	struct Rect : public Point, Size {
+	public:
+		Rect(int x=0, int y=0, int z=0, int w=0, int h=0, int l=0) : Point(x, y, z), Size(w, h, l) {};
 
-	bool is_colliding_pwr(Point& src, Rect& dst) {
-		return true;
-	}
+		bool is_colliding(const Rect& other) {
+			return false;
+		}
+
+		bool is_colliding_with_point(const Point& pt) {
+			return false;
+		}
+	};
 }
