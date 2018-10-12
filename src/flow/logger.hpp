@@ -22,12 +22,5 @@ namespace flow {
 			std::string msg = error_source+" reported error (\""+std::string(sdl_error_msg)+"\"). It has been fixed. Fix way: "+fix_way+".";
 			warn(msg);
 		}
-
-		// logs flow debug if is_debugging flag is set.
-		void flow_debug(bool is_debugging, std::string msg) {
-			if(is_debugging) {
-				debug(msg);
-			}
-		}
 	}
 }

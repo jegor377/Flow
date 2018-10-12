@@ -4,10 +4,11 @@
 #include <iostream>
 
 namespace game {
-	class Player : public flow::Entity {
+	class Player : public flow::GameEntity {
 	public:
-		Player() : flow::Entity() {
-			;
+		Player(flow::Flow* engine) : flow::GameEntity(engine) {
+			this->name = (char*)"p1";
+			this->group = (char*)"g1";
 		}
 
 		void update(double delta) {std::cout<<"test"<<std::endl;};

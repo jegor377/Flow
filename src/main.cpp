@@ -1,4 +1,5 @@
 #include <iostream>
+#include <exception>
 #include "flow.hpp"
 #include "sample/player.hpp"
 
@@ -9,7 +10,7 @@ int main(int argc, char** argv) {
 		flow::init();
 		atexit(flow::quit);
 
-		flow::Flow engine(DEBUG_MODE);
+		flow::Flow engine(false);
 
 		engine.create_window("Test Window:)");
 		flow::log::info("Window created.");
@@ -17,18 +18,12 @@ int main(int argc, char** argv) {
 		engine.add_sprite("test", "test.png");
 		flow::log::info("Sprites loaded.");
 
-		game::Player player;
+		game::Player player(&engine);
 		engine.add_entity(&player);
-		
+
 		SDL_Delay(2000);
-	} catch(flow::exception::Init& e) {
-		flow::log::error( "INIT ERROR: "+std::string(e.what())+"." );
-		return 1;
-	} catch(flow::exception::Window& e) {
-		flow::log::info("Window error occurred.");
-		return 1;
-	} catch(flow::exception::SpriteLoad& e) {
-		flow::log::error(e.what());
+	} catch(std::exception& e) {
+		if(DEBUG_MODE) flow::log::error(e.what());
 		return 1;
 	}
 	return 0;

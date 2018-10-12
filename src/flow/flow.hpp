@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <exception>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -13,6 +14,8 @@
 @import vector;
 @import size;
 @import rect;
+//sprite
+@import sprite;
 //entities
 @import entity;
 //types
@@ -23,6 +26,8 @@
 @import init_err;
 @import window_err;
 @import spriteload_err;
+@import entityfind_err;
+@import nullstr_err;
 //collectors
 @import entity_collector;
 @import sprite_collector;
@@ -40,16 +45,15 @@ namespace flow {
 	class Flow {
 		Window window;
 		Renderer canvas;
+
 		EntityCollector entity_collector;
 		SpriteCollector sprite_collector;
 
 	public:
-		bool is_debugging;
 		bool is_fixable;
 		ScreenMode scr_mode;
 
-		Flow(bool is_debugging=false, bool is_fixable=true) {
-			this->is_debugging = is_debugging;
+		Flow(bool is_fixable=true) {
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
 		}
@@ -59,56 +63,77 @@ namespace flow {
 			SDL_DestroyWindow(this->window);
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {// throw(exception::Window)
+		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas();
 		}
 
+		// entity methods
 		void add_entity(Entity* entity) {
 			entity_collector.add(entity);
 		}
 
+		void remove_entity_by_name(char* name) {
+			entity_collector.remove_by_name(name);
+		}
+
+		void remove_entities_by_group(char* group) {
+			entity_collector.remove_by_group(group);
+		}
+
+		Entity* get_entity_by_name(char* name) {
+			return entity_collector.get_by_name(name);
+		}
+
+		EntityMap get_entities_by_group(char* group) {
+			return entity_collector.get_by_group(group);
+		}
+
+		// sprite methods
 		void add_sprite(const char* name, const char* path) {
 			sprite_collector.add(this->canvas, name, path);
 		}
 
+		// game stuff
 		void game_loop() {
 			;
 		}
 
 	private:
 		//initializing methods.
-		void initialize_window(const char* w_name, Point2& pos, Size2& size) {// throw(exception::Window)
+		void initialize_window(const char* w_name, Point2& pos, Size2& size) {
 			this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
 			if(this->window == NULL) {
-				throw exception::Window(this->is_debugging, "Could not create window", SDL_GetError());
+				throw exception::Window("Cannot to create window", SDL_GetError());
 			}
 		}
 
-		void initialize_canvas() {//throw(exception::Window)
+		void initialize_canvas() {
 			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
 				// try to fix a problem
 				if(!this->fix_create_canvas(error_msg)) {
-					throw exception::Window(this->is_debugging, "Could not create canvas (renderer)", error_msg);
+					throw exception::Window("Cannot to create canvas (renderer)", error_msg);
 				}
 			}
 		}
 
 		//fix methods. Return value says if the problem was fixed.
 		bool fix_create_canvas(const char* error_msg) {
-			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_SOFTWARE);
-			if(this->canvas != NULL) {
-				log::sdl_fix_warn("SDL_CreateRenderer", "Creating renderer as software fallback (SDL_RENDERER_SOFTWARE)", error_msg);
-				return true;
+			if(this->is_fixable) {
+				this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_SOFTWARE);
+				if(this->canvas != NULL) {
+					log::sdl_fix_warn("SDL_CreateRenderer", "Creating renderer as software fallback (SDL_RENDERER_SOFTWARE)", error_msg);
+					return true;
+				}
 			}
 			return false;
 		}
 	};
 
-	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, int img_init_flags=DEFAULT_IMG_INIT_FLAGS, bool is_fixable=true) {// throw(exception::Init)
+	void init(int sdl_support_flags=DEFAULT_INIT_FLAGS, int img_init_flags=DEFAULT_IMG_INIT_FLAGS, bool is_fixable=true) {
 		// Initing SDL2
 		if(SDL_Init(sdl_support_flags) < 0) {
 			const char* error_msg = SDL_GetError();
@@ -142,3 +167,6 @@ namespace flow {
 		SDL_Quit();
 	}
 }
+
+//special entities
+@import game_entity;

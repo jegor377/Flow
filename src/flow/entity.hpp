@@ -24,5 +24,13 @@ namespace flow {
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event* event) = 0;
 		virtual void collision(Entity& body) = 0;
+
+		char* get_name() {
+			return this->name;
+		}
+
+		char* get_group() {
+			return this->group;
+		}
 	};
 }
