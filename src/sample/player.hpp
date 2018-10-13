@@ -11,12 +11,11 @@ namespace game {
 			i=0;
 			this->name = "p1";
 			this->group = "g1";
-			this->sprite = this->engine->get_sprite("test");
+			this->shared_sprite.sprite = this->engine->get_sprite("test");
 		}
 
 		void update(double delta) {
-			i++;
-			if(i==120) this->engine->is_running = false;
+			if((i++)==120) this->engine->is_running = false;
 		}
 		void event(SDL_Event* delta) {flow::log::info("event");}
 		void collision(flow::Entity& body) {flow::log::info("collision");}

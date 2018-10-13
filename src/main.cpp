@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
 		engine.game_loop();
 
-		flow::log::info("END");
+		flow::log::info("120 Frames finished.");
 		SDL_Delay(2000);
 	} catch(std::exception& e) {
 		if(DEBUG_MODE) flow::log::error(e.what());

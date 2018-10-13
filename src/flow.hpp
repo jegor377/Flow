@@ -97,6 +97,54 @@ namespace flow {
 		}
 	};
 }
+//sprite exceptions
+namespace flow {
+	namespace exception {
+		class SpriteAssign: public std::exception {
+		public:
+			const char* what() const throw() {
+				return "Sprite reference not assigned in SharedSprite.";
+			}
+		};
+	}
+}
+namespace flow {
+	namespace exception {
+		class SpriteFind: public std::exception {
+			std::string err_msg;
+		public:
+			SpriteFind(const std::string& name) {
+				this->err_msg = "Sprite with name \"" + name + "\" not found.";
+			}
+
+			const char* what() const throw() {
+				return this->err_msg.c_str();
+			}
+		};
+	}
+}
+namespace flow {
+	namespace exception {
+		class SpriteLoad: public std::exception {
+			std::string err_msg;
+
+		public:
+			SpriteLoad(const std::string& name, const std::string& path, const char* sdl_err_msg) {
+				this->err_msg = "Cannot to load sprite with name \"";
+				this->err_msg += name;
+				this->err_msg += "\" and path \"";
+				this->err_msg += path;
+				this->err_msg += "\". SDL error info: ";
+				this->err_msg += sdl_err_msg;
+				this->err_msg +=".";
+			}
+			
+			const char* what() const throw() {
+				return this->err_msg.c_str();
+			}
+		};
+	}
+}
 //sprite
 namespace flow {
 	class Sprite {
@@ -105,9 +153,6 @@ namespace flow {
 		std::string path;
 
 	public:
-		Rect2 source_section;
-		Rect2 destination_section;
-
 		Sprite(const std::string& name, const std::string& path) {
 			this->texture = NULL;
 			this->name = name;
@@ -127,12 +172,12 @@ namespace flow {
 	public:
 		friend class SpriteCollector;
 
-		friend void draw(Sprite* sprite);
-
-		Size2* get_size() {
-			int w, h;
-			SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
-			return new Size2(w, h);
+		const Size2* get_size() {
+			if(this->texture != NULL) {
+				int w, h;
+				SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
+				return new Size2(w, h);
+			} else return NULL;
 		}
 
 		const std::string get_name() {
@@ -147,8 +192,50 @@ namespace flow {
 			return this->name == name;
 		}
 	};
-	
+
 	typedef std::shared_ptr<Sprite> SpritePtr;
+}
+namespace flow {
+	class SharedSprite {
+	public:
+		SpritePtr sprite;
+		Rect2 source_section;
+		Rect2 destination_section;
+
+		SharedSprite() {
+			this->sprite.reset();
+		}
+
+		SharedSprite(SpritePtr sprite) {
+			this->sprite = sprite;
+		}
+
+		SharedSprite(SpritePtr sprite, Rect2 source_section, Rect2 destination_section) {
+			this->sprite = sprite;
+			this->source_section = source_section;
+			this->destination_section = destination_section;
+		}
+
+		const Size2* get_size() {
+			if(this->sprite) return this->sprite->get_size();
+			throw exception::SpriteAssign();
+		}
+
+		const std::string get_name() {
+			if(this->sprite) return this->sprite->get_name();
+			throw exception::SpriteAssign();
+		}
+
+		const std::string get_path() {
+			if(this->sprite) return this->sprite->get_path();
+			throw exception::SpriteAssign();
+		}
+
+		bool has_name(const std::string& name) {
+			if(this->sprite) return this->sprite->has_name(name);
+			throw exception::SpriteAssign();
+		}
+	};
 }
 //entities
 namespace flow {
@@ -159,16 +246,15 @@ namespace flow {
 		
 		std::string name;
 		std::string group;
-
-		SpritePtr sprite;
-
+	public:
+		SharedSprite shared_sprite;
+		
 		bool is_handling_rendering;
 		bool is_handling_update;
 		bool is_handling_events;
 		bool is_handling_collisions;
 	private:
 		void set_default() {
-			this->sprite = NULL;
 			this->is_handling_rendering = true;
 			this->is_handling_update = true;
 			this->is_handling_events = true;
@@ -279,28 +365,6 @@ namespace flow {
 }
 namespace flow {
 	namespace exception {
-		class SpriteLoad: public std::exception {
-			std::string err_msg;
-
-		public:
-			SpriteLoad(const std::string& name, const std::string& path, const char* sdl_err_msg) {
-				this->err_msg = "Cannot to load sprite with name \"";
-				this->err_msg += name;
-				this->err_msg += "\" and path \"";
-				this->err_msg += path;
-				this->err_msg += "\". SDL error info: ";
-				this->err_msg += sdl_err_msg;
-				this->err_msg +=".";
-			}
-			
-			const char* what() const throw() {
-				return this->err_msg.c_str();
-			}
-		};
-	}
-}
-namespace flow {
-	namespace exception {
 		class EntityFindByName: public std::exception {
 			std::string err_msg;
 		public:
@@ -318,21 +382,6 @@ namespace flow {
 		public:
 			EntityFindByGroup(const std::string& group) {
 				this->err_msg = "Entity with group name \"" + group + "\" not found.";
-			}
-
-			const char* what() const throw() {
-				return this->err_msg.c_str();
-			}
-		};
-	}
-}
-namespace flow {
-	namespace exception {
-		class SpriteFind: public std::exception {
-			std::string err_msg;
-		public:
-			SpriteFind(const std::string& name) {
-				this->err_msg = "Sprite with name \"" + name + "\" not found.";
 			}
 
 			const char* what() const throw() {
@@ -575,7 +624,9 @@ namespace flow {
 			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
 			this->last_update_time = update_time_now;
 			for(auto entity : this->entity_collector.entities) {
-				entity->update(delta_time);
+				if(entity->is_handling_update) {
+					entity->update(delta_time);
+				}
 			}
 		}
 

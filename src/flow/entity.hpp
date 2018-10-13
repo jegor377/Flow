@@ -6,16 +6,15 @@ namespace flow {
 		
 		std::string name;
 		std::string group;
-
-		SpritePtr sprite;
-
+	public:
+		SharedSprite shared_sprite;
+		
 		bool is_handling_rendering;
 		bool is_handling_update;
 		bool is_handling_events;
 		bool is_handling_collisions;
 	private:
 		void set_default() {
-			this->sprite = NULL;
 			this->is_handling_rendering = true;
 			this->is_handling_update = true;
 			this->is_handling_events = true;

@@ -16,8 +16,13 @@
 @import vector;
 @import size;
 @import rect;
+//sprite exceptions
+@import spriteassign_err;
+@import spritefind_err;
+@import spriteload_err;
 //sprite
 @import sprite;
+@import shared_sprite;
 //entities
 @import entity;
 //types
@@ -27,9 +32,7 @@
 //exceptions
 @import init_err;
 @import window_err;
-@import spriteload_err;
 @import entityfind_err;
-@import spritefind_err;
 //collectors
 @import entity_collector;
 @import sprite_collector;
@@ -119,7 +122,9 @@ namespace flow {
 			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
 			this->last_update_time = update_time_now;
 			for(auto entity : this->entity_collector.entities) {
-				entity->update(delta_time);
+				if(entity->is_handling_update) {
+					entity->update(delta_time);
+				}
 			}
 		}
 

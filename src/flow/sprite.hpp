@@ -5,9 +5,6 @@ namespace flow {
 		std::string path;
 
 	public:
-		Rect2 source_section;
-		Rect2 destination_section;
-
 		Sprite(const std::string& name, const std::string& path) {
 			this->texture = NULL;
 			this->name = name;
@@ -27,12 +24,12 @@ namespace flow {
 	public:
 		friend class SpriteCollector;
 
-		friend void draw(Sprite* sprite);
-
-		Size2* get_size() {
-			int w, h;
-			SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
-			return new Size2(w, h);
+		const Size2* get_size() {
+			if(this->texture != NULL) {
+				int w, h;
+				SDL_QueryTexture(this->texture, NULL, NULL, &w, &h);
+				return new Size2(w, h);
+			} else return NULL;
 		}
 
 		const std::string get_name() {
@@ -47,6 +44,6 @@ namespace flow {
 			return this->name == name;
 		}
 	};
-	
+
 	typedef std::shared_ptr<Sprite> SpritePtr;
 }
