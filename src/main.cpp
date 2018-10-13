@@ -12,15 +12,17 @@ int main(int argc, char** argv) {
 
 		flow::Flow engine(false);
 
-		engine.create_window("Test Window:)");
+		engine.create_window();
 		flow::log::info("Window created.");
 
 		engine.add_sprite("test", "test.png");
 		flow::log::info("Sprites loaded.");
 
-		game::Player player(&engine);
-		engine.add_entity(&player);
+		engine.add_entity( std::make_shared<game::Player>(&engine) );
 
+		engine.game_loop();
+
+		flow::log::info("END");
 		SDL_Delay(2000);
 	} catch(std::exception& e) {
 		if(DEBUG_MODE) flow::log::error(e.what());

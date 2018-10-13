@@ -1,10 +1,12 @@
 #pragma once
 
+#include <deque>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <exception>
 #include <algorithm>
+#include <memory>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -99,14 +101,14 @@ namespace flow {
 namespace flow {
 	class Sprite {
 		SDL_Texture* texture;
-		const char* name;
-		const char* path;
+		std::string name;
+		std::string path;
 
 	public:
 		Rect2 source_section;
 		Rect2 destination_section;
 
-		Sprite(const char* name, const char* path) {
+		Sprite(const std::string& name, const std::string& path) {
 			this->texture = NULL;
 			this->name = name;
 			this->path = path;
@@ -133,14 +135,20 @@ namespace flow {
 			return new Size2(w, h);
 		}
 
-		const char* get_name() {
+		const std::string get_name() {
 			return this->name;
 		}
 
-		const char* get_path() {
+		const std::string get_path() {
 			return this->path;
 		}
+
+		bool has_name(const std::string& name) {
+			return this->name == name;
+		}
 	};
+	
+	typedef std::shared_ptr<Sprite> SpritePtr;
 }
 //entities
 namespace flow {
@@ -149,70 +157,87 @@ namespace flow {
 		Point pos;
 		Size size;
 		
-		char* name;
-		char* group;
+		std::string name;
+		std::string group;
+
+		SpritePtr sprite;
+
+		bool is_handling_rendering;
+		bool is_handling_update;
+		bool is_handling_events;
+		bool is_handling_collisions;
+	private:
+		void set_default() {
+			this->sprite = NULL;
+			this->is_handling_rendering = true;
+			this->is_handling_update = true;
+			this->is_handling_events = true;
+			this->is_handling_collisions = true;
+		}
+
 	public:
-		Entity() {}
+		Entity() {
+			this->set_default();
+		}
 	
-		Entity(Point pos, Size size, char* name, char* group) {
+		Entity(Point pos, Size size, const std::string& name, const std::string& group) {
 			this->pos   = pos;
 			this->size  = size;
 			this->name  = name;
 			this->group = group;
-		}
-
-		Entity(const Entity& copy_entity) {
-			strcpy(this->name, copy_entity.name);
-			strcpy(this->group, copy_entity.group);
+			this->set_default();
 		}
 		
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event* event) = 0;
 		virtual void collision(Entity& body) = 0;
 
-		char* get_name() {
+		const std::string get_name() {
 			return this->name;
 		}
 
-		char* get_group() {
+		const std::string get_group() {
 			return this->group;
 		}
+
+		bool has_name(const std::string& name) {
+			return this->name == name;
+		}
+
+		bool is_in_group(const std::string& group) {
+			return this->group == group;
+		}
 	};
+
+	typedef std::shared_ptr<Entity> EntityPtr;
 }
 //types
 namespace flow {
 	typedef SDL_Window* Window;
 	typedef SDL_Renderer* Renderer;
-	typedef std::vector<flow::Entity*> EntityList;
-
-	struct EntityPair {
-		int id;
-		flow::Entity* entity;
-	};
-	typedef std::vector<EntityPair> EntityMap;
 }
 //logger
 namespace flow {
 	namespace log {
-		void info(std::string msg) {
+		void info(const std::string& msg) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, msg.c_str());
 		}
 
-		void warn(std::string msg) {
+		void warn(const std::string& msg) {
 			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, msg.c_str());
 		}
 
-		void error(std::string msg) {
+		void error(const std::string& msg) {
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, msg.c_str());
 		}
 
-		void debug(std::string msg) {
+		void debug(const std::string& msg) {
 			SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, msg.c_str());
 		}
 
 		// special functions
 		// logs warn when sdl reported error and flow fixed it somehow.
-		void sdl_fix_warn(std::string error_source, std::string fix_way, const char* sdl_error_msg) {
+		void sdl_fix_warn(const std::string& error_source, const std::string& fix_way, const char* sdl_error_msg) {
 			std::string msg = error_source+" reported error (\""+std::string(sdl_error_msg)+"\"). It has been fixed. Fix way: "+fix_way+".";
 			warn(msg);
 		}
@@ -242,7 +267,7 @@ namespace flow {
 
 		public:
 			//TODO: Find out why it doesn't work.
-			Window(std::string err_msg, const char* sdl_err_msg) {
+			Window(const std::string& err_msg, const char* sdl_err_msg) {
 				this->err_msg = err_msg + ". SDL2 error message: " + std::string(sdl_err_msg) + ".";
 			}
 
@@ -258,7 +283,7 @@ namespace flow {
 			std::string err_msg;
 
 		public:
-			SpriteLoad(const char* name, const char* path, const char* sdl_err_msg) {
+			SpriteLoad(const std::string& name, const std::string& path, const char* sdl_err_msg) {
 				this->err_msg = "Cannot to load sprite with name \"";
 				this->err_msg += name;
 				this->err_msg += "\" and path \"";
@@ -279,11 +304,8 @@ namespace flow {
 		class EntityFindByName: public std::exception {
 			std::string err_msg;
 		public:
-			EntityFindByName(char* name) {
-				std::string name_str = name;
-				if(name == NULL) name_str = "NULL";
-				
-				this->err_msg = "Entity with name \"" + name_str + "\" not found.";
+			EntityFindByName(const std::string& name) {
+				this->err_msg = "Entity with name \"" + name + "\" not found.";
 			}
 
 			const char* what() const throw() {
@@ -294,11 +316,8 @@ namespace flow {
 		class EntityFindByGroup: public std::exception {
 			std::string err_msg;
 		public:
-			EntityFindByGroup(char* group) {
-				std::string group_name = group;
-				if(group == NULL) group_name = "NULL";
-
-				this->err_msg = "Entity with group name \"" + group_name + "\" not found.";
+			EntityFindByGroup(const std::string& group) {
+				this->err_msg = "Entity with group name \"" + group + "\" not found.";
 			}
 
 			const char* what() const throw() {
@@ -309,32 +328,37 @@ namespace flow {
 }
 namespace flow {
 	namespace exception {
-		class NullString: public std::exception {
-			std::string method_name;
-			std::string additional_info;
+		class SpriteFind: public std::exception {
+			std::string err_msg;
 		public:
-			NullString(std::string method_name, std::string additional_info="") {
-				this->method_name = method_name;
-				this->additional_info = additional_info;
+			SpriteFind(const std::string& name) {
+				this->err_msg = "Sprite with name \"" + name + "\" not found.";
 			}
 
 			const char* what() const throw() {
-				std::string err_msg = "Given string (char*) in method with name \"" + this->method_name + "\" is NULL. " + additional_info;
-				return err_msg.c_str();
+				return this->err_msg.c_str();
 			}
 		};
 	}
 }
 //collectors
 namespace flow {
+	struct EntityPair {
+		int id;
+		EntityPtr entity;
+	};
+
+	typedef std::deque<EntityPtr> EntityList;
+	typedef std::vector<EntityPair> EntityMap;
+
 	class EntityCollector {
 		EntityList entities;
 	public:
 
+		friend class Flow;
+
 		~EntityCollector() {
-			for(auto entity : entities) {
-				delete entity;
-			}
+			entities.clear();
 		}
 		
 		/**
@@ -342,7 +366,7 @@ namespace flow {
 		 *
 		 *  \param entity New entity handler.
 		 */
-		void add(Entity* entity) {
+		void add(EntityPtr entity) {
 			this->entities.push_back(entity);
 		}
 
@@ -351,7 +375,7 @@ namespace flow {
 		 *
 		 *  \param name Entity's name.
 		 */
-		void remove_by_name(char* name) {
+		void remove_by_name(const std::string& name) {
 			this->entities.erase(this->find_by_name(name));
 		}
 
@@ -360,7 +384,7 @@ namespace flow {
 		 *
 		 *  \param group Entities' group name.
 		 */
-		void remove_by_group(char* group) {
+		void remove_by_group(const std::string& group) {
 			auto found_entities = this->find_by_group(group);
 			for(auto entity : found_entities) {
 				this->entities.erase(this->entities.begin()+entity.id);
@@ -371,9 +395,9 @@ namespace flow {
 		 *  \brief Finds the first entity that possesses specified name.
 		 *
 		 *  \param name Entity's name.
-		 *  \return Entity's pointer.
+		 *  \return Entity's shared pointer.
 		 */
-		Entity* get_by_name(char* name) {
+		EntityPtr get_by_name(const std::string& name) {
 			auto result = this->find_by_name(name);
 			return *result;
 		}
@@ -384,7 +408,7 @@ namespace flow {
 		 *  \param group Entities' group name.
 		 *  \return Map of entities' pointers and it's poisitions in Entity Collector.
 		 */
-		EntityMap get_by_group(char* group) {
+		EntityMap get_by_group(const std::string& group) {
 			return find_by_group(group);
 		}
 
@@ -395,13 +419,9 @@ namespace flow {
 		 *  \param name Entity's name.
 		 *  \return Entity's iterator from Entity Collector entities list.
 		 */
-		EntityList::iterator find_by_name(char* name) {
-			if(name == NULL) {
-				std::string additional_info = "It can happen when you have specified a NULL (char*) pointer to one of EntityCollector searching methods. I.e get_by_name or remove_by_name.";
-				throw exception::NullString("find_by_name", additional_info);
-			}
-			auto entity_iterator = std::find_if(this->entities.begin(), this->entities.end(), [name](Entity* e){
-				return strcmp(e->get_name(), name) == 0;
+		EntityList::iterator find_by_name(const std::string& name) {
+			auto entity_iterator = std::find_if(this->entities.begin(), this->entities.end(), [name](EntityPtr e){
+				return e->has_name(name);
 			});
 			if(entity_iterator != this->entities.end()) {
 				return entity_iterator;
@@ -415,14 +435,10 @@ namespace flow {
 		 *  \param group Entities' group name.
 		 *  \return Map of entities' pointers and it's poisitions in Entity Collector.
 		 */
-		EntityMap find_by_group(char* group) {
+		EntityMap find_by_group(const std::string& group) {
 			EntityMap result;
-			if(group == NULL) {
-				std::string additional_info = "It can happen when you have specified a NULL (char*) pointer to one of EntityCollector searching methods. I.e get_by_group or remove_by_group.";
-				throw exception::NullString("find_by_group", additional_info);
-			}
 			for(int entity_id = 0; entity_id < this->entities.size(); entity_id++) {
-				if(strcmp(this->entities[entity_id]->get_group(), group) == 0) {
+				if(this->entities[entity_id]->is_in_group(group)) {
 					EntityPair new_pair = {entity_id, this->entities[entity_id]};
 					result.push_back(new_pair);
 				}
@@ -433,33 +449,43 @@ namespace flow {
 	};
 }
 namespace flow {
+	typedef std::vector<SpritePtr> SpriteList;
+	
 	class SpriteCollector {
-		std::vector<Sprite*> sprites;
+		SpriteList sprites;
 	public:
 
 		~SpriteCollector() {
-			for(auto sprite : sprites) {
-				delete sprite;
-			}
+			sprites.clear();
 		}
 
-		void add(const Renderer canvas, const char* name, const char* path) {
-			auto sprite = new Sprite(name, path);
+		void add(const Renderer canvas, const std::string& name, const std::string& path) {
+			auto sprite = std::make_shared<Sprite>(name, path);
 			this->sprites.push_back(sprite);
 			this->load_sprite(canvas, sprite);
 		}
 
-		void remove(const char* name) {
-			;
+		void remove(const std::string& name) {
+			this->sprites.erase(this->find(name));
 		}
 
-		Sprite* get(const char* name) {
-			;
+		SpritePtr get(const std::string& name) {
+			return *(this->find(name));
 		}
 	private:
-		void load_sprite(const Renderer canvas, Sprite* sprite) {
-			sprite->texture = IMG_LoadTexture(canvas, sprite->path);
+		void load_sprite(const Renderer canvas, SpritePtr sprite) {
+			sprite->texture = IMG_LoadTexture(canvas, sprite->path.c_str());
 			if(sprite->texture == NULL) throw exception::SpriteLoad(sprite->name, sprite->path, SDL_GetError());
+		}
+
+		SpriteList::iterator find(const std::string& name) {
+			auto sprite_iterator = std::find_if(this->sprites.begin(), this->sprites.end(), [name](SpritePtr e){
+				return e->has_name(name);
+			});
+			if(sprite_iterator != this->sprites.end()) {
+				return sprite_iterator;
+			}
+			throw exception::SpriteFind(name);
 		}
 	};
 }
@@ -481,13 +507,16 @@ namespace flow {
 		EntityCollector entity_collector;
 		SpriteCollector sprite_collector;
 
-	public:
 		bool is_fixable;
+	public:
 		ScreenMode scr_mode;
+		bool is_running = true;
+		Uint64 last_update_time;
 
 		Flow(bool is_fixable=true) {
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
+			this->last_update_time = SDL_GetPerformanceCounter();
 		}
 
 		~Flow() {
@@ -495,14 +524,14 @@ namespace flow {
 			SDL_DestroyWindow(this->window);
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
+		void create_window(const std::string& w_name = "Sample", bool use_vsync=true, Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
-			this->initialize_canvas();
+			this->initialize_canvas(use_vsync);
 		}
 
 		// entity methods
-		void add_entity(Entity* entity) {
+		void add_entity(std::shared_ptr<Entity> entity) {
 			entity_collector.add(entity);
 		}
 
@@ -514,7 +543,7 @@ namespace flow {
 			entity_collector.remove_by_group(group);
 		}
 
-		Entity* get_entity_by_name(char* name) {
+		EntityPtr get_entity_by_name(char* name) {
 			return entity_collector.get_by_name(name);
 		}
 
@@ -523,26 +552,63 @@ namespace flow {
 		}
 
 		// sprite methods
-		void add_sprite(const char* name, const char* path) {
+		void add_sprite(const std::string& name, const std::string& path) {
 			sprite_collector.add(this->canvas, name, path);
 		}
 
+		void remove_sprite(const std::string& name) {
+			sprite_collector.remove(name);
+		}
+
+		SpritePtr get_sprite(const std::string& name) {
+			return sprite_collector.get(name);
+		}
+
 		// game stuff
-		void game_loop() {
+		void handle_events() {
 			;
+		}
+
+		void update() {
+			const Uint64 ONE_SEC_IN_MS = 1000;
+			auto update_time_now = SDL_GetPerformanceCounter();
+			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
+			this->last_update_time = update_time_now;
+			for(auto entity : this->entity_collector.entities) {
+				entity->update(delta_time);
+			}
+		}
+
+		void handle_collisions() {
+			;
+		}
+
+		void render() {
+			;
+		}
+
+		void game_loop() {
+			while(this->is_running) {
+				SDL_RenderClear(this->canvas);
+				this->handle_events();
+				this->update();
+				this->render();
+				SDL_RenderPresent(this->canvas);
+			}
 		}
 
 	private:
 		//initializing methods.
-		void initialize_window(const char* w_name, Point2& pos, Size2& size) {
-			this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
+		void initialize_window(const std::string& w_name, Point2& pos, Size2& size) {
+			this->window = SDL_CreateWindow(w_name.c_str(), pos.x, pos.y, size.w, size.h, this->scr_mode);
 			if(this->window == NULL) {
 				throw exception::Window("Cannot to create window", SDL_GetError());
 			}
 		}
 
-		void initialize_canvas() {
-			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		void initialize_canvas(bool use_vsync) {
+			auto renderer_flags = use_vsync ? SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC : SDL_RENDERER_ACCELERATED;
+			this->canvas = SDL_CreateRenderer(this->window, -1, renderer_flags);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
 				// try to fix a problem
@@ -610,7 +676,7 @@ namespace flow {
 			this->engine = engine;
 		}
 
-		GameEntity(Flow* engine, Point pos, Size size, char* name, char* group) : Entity(pos, size, name, group) {
+		GameEntity(Flow* engine, Point pos, Size size, const std::string& name, const std::string& group) : Entity(pos, size, name, group) {
 			this->engine = engine;
 		}
 

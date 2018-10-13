@@ -1,12 +1,20 @@
 namespace flow {
+	struct EntityPair {
+		int id;
+		EntityPtr entity;
+	};
+
+	typedef std::deque<EntityPtr> EntityList;
+	typedef std::vector<EntityPair> EntityMap;
+
 	class EntityCollector {
 		EntityList entities;
 	public:
 
+		friend class Flow;
+
 		~EntityCollector() {
-			for(auto entity : entities) {
-				delete entity;
-			}
+			entities.clear();
 		}
 		
 		/**
@@ -14,7 +22,7 @@ namespace flow {
 		 *
 		 *  \param entity New entity handler.
 		 */
-		void add(Entity* entity) {
+		void add(EntityPtr entity) {
 			this->entities.push_back(entity);
 		}
 
@@ -23,7 +31,7 @@ namespace flow {
 		 *
 		 *  \param name Entity's name.
 		 */
-		void remove_by_name(char* name) {
+		void remove_by_name(const std::string& name) {
 			this->entities.erase(this->find_by_name(name));
 		}
 
@@ -32,7 +40,7 @@ namespace flow {
 		 *
 		 *  \param group Entities' group name.
 		 */
-		void remove_by_group(char* group) {
+		void remove_by_group(const std::string& group) {
 			auto found_entities = this->find_by_group(group);
 			for(auto entity : found_entities) {
 				this->entities.erase(this->entities.begin()+entity.id);
@@ -43,9 +51,9 @@ namespace flow {
 		 *  \brief Finds the first entity that possesses specified name.
 		 *
 		 *  \param name Entity's name.
-		 *  \return Entity's pointer.
+		 *  \return Entity's shared pointer.
 		 */
-		Entity* get_by_name(char* name) {
+		EntityPtr get_by_name(const std::string& name) {
 			auto result = this->find_by_name(name);
 			return *result;
 		}
@@ -56,7 +64,7 @@ namespace flow {
 		 *  \param group Entities' group name.
 		 *  \return Map of entities' pointers and it's poisitions in Entity Collector.
 		 */
-		EntityMap get_by_group(char* group) {
+		EntityMap get_by_group(const std::string& group) {
 			return find_by_group(group);
 		}
 
@@ -67,13 +75,9 @@ namespace flow {
 		 *  \param name Entity's name.
 		 *  \return Entity's iterator from Entity Collector entities list.
 		 */
-		EntityList::iterator find_by_name(char* name) {
-			if(name == NULL) {
-				std::string additional_info = "It can happen when you have specified a NULL (char*) pointer to one of EntityCollector searching methods. I.e get_by_name or remove_by_name.";
-				throw exception::NullString("find_by_name", additional_info);
-			}
-			auto entity_iterator = std::find_if(this->entities.begin(), this->entities.end(), [name](Entity* e){
-				return strcmp(e->get_name(), name) == 0;
+		EntityList::iterator find_by_name(const std::string& name) {
+			auto entity_iterator = std::find_if(this->entities.begin(), this->entities.end(), [name](EntityPtr e){
+				return e->has_name(name);
 			});
 			if(entity_iterator != this->entities.end()) {
 				return entity_iterator;
@@ -87,14 +91,10 @@ namespace flow {
 		 *  \param group Entities' group name.
 		 *  \return Map of entities' pointers and it's poisitions in Entity Collector.
 		 */
-		EntityMap find_by_group(char* group) {
+		EntityMap find_by_group(const std::string& group) {
 			EntityMap result;
-			if(group == NULL) {
-				std::string additional_info = "It can happen when you have specified a NULL (char*) pointer to one of EntityCollector searching methods. I.e get_by_group or remove_by_group.";
-				throw exception::NullString("find_by_group", additional_info);
-			}
 			for(int entity_id = 0; entity_id < this->entities.size(); entity_id++) {
-				if(strcmp(this->entities[entity_id]->get_group(), group) == 0) {
+				if(this->entities[entity_id]->is_in_group(group)) {
 					EntityPair new_pair = {entity_id, this->entities[entity_id]};
 					result.push_back(new_pair);
 				}

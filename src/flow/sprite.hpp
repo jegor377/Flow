@@ -1,14 +1,14 @@
 namespace flow {
 	class Sprite {
 		SDL_Texture* texture;
-		const char* name;
-		const char* path;
+		std::string name;
+		std::string path;
 
 	public:
 		Rect2 source_section;
 		Rect2 destination_section;
 
-		Sprite(const char* name, const char* path) {
+		Sprite(const std::string& name, const std::string& path) {
 			this->texture = NULL;
 			this->name = name;
 			this->path = path;
@@ -35,12 +35,18 @@ namespace flow {
 			return new Size2(w, h);
 		}
 
-		const char* get_name() {
+		const std::string get_name() {
 			return this->name;
 		}
 
-		const char* get_path() {
+		const std::string get_path() {
 			return this->path;
 		}
+
+		bool has_name(const std::string& name) {
+			return this->name == name;
+		}
 	};
+	
+	typedef std::shared_ptr<Sprite> SpritePtr;
 }

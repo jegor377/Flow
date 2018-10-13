@@ -1,10 +1,12 @@
 #pragma once
 
+#include <deque>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <exception>
 #include <algorithm>
+#include <memory>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -27,7 +29,7 @@
 @import window_err;
 @import spriteload_err;
 @import entityfind_err;
-@import nullstr_err;
+@import spritefind_err;
 //collectors
 @import entity_collector;
 @import sprite_collector;
@@ -49,13 +51,16 @@ namespace flow {
 		EntityCollector entity_collector;
 		SpriteCollector sprite_collector;
 
-	public:
 		bool is_fixable;
+	public:
 		ScreenMode scr_mode;
+		bool is_running = true;
+		Uint64 last_update_time;
 
 		Flow(bool is_fixable=true) {
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
+			this->last_update_time = SDL_GetPerformanceCounter();
 		}
 
 		~Flow() {
@@ -63,14 +68,14 @@ namespace flow {
 			SDL_DestroyWindow(this->window);
 		}
 
-		void create_window(const char* w_name = "Sample", Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
+		void create_window(const std::string& w_name = "Sample", bool use_vsync=true, Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
-			this->initialize_canvas();
+			this->initialize_canvas(use_vsync);
 		}
 
 		// entity methods
-		void add_entity(Entity* entity) {
+		void add_entity(std::shared_ptr<Entity> entity) {
 			entity_collector.add(entity);
 		}
 
@@ -82,7 +87,7 @@ namespace flow {
 			entity_collector.remove_by_group(group);
 		}
 
-		Entity* get_entity_by_name(char* name) {
+		EntityPtr get_entity_by_name(char* name) {
 			return entity_collector.get_by_name(name);
 		}
 
@@ -91,26 +96,63 @@ namespace flow {
 		}
 
 		// sprite methods
-		void add_sprite(const char* name, const char* path) {
+		void add_sprite(const std::string& name, const std::string& path) {
 			sprite_collector.add(this->canvas, name, path);
 		}
 
+		void remove_sprite(const std::string& name) {
+			sprite_collector.remove(name);
+		}
+
+		SpritePtr get_sprite(const std::string& name) {
+			return sprite_collector.get(name);
+		}
+
 		// game stuff
-		void game_loop() {
+		void handle_events() {
 			;
+		}
+
+		void update() {
+			const Uint64 ONE_SEC_IN_MS = 1000;
+			auto update_time_now = SDL_GetPerformanceCounter();
+			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
+			this->last_update_time = update_time_now;
+			for(auto entity : this->entity_collector.entities) {
+				entity->update(delta_time);
+			}
+		}
+
+		void handle_collisions() {
+			;
+		}
+
+		void render() {
+			;
+		}
+
+		void game_loop() {
+			while(this->is_running) {
+				SDL_RenderClear(this->canvas);
+				this->handle_events();
+				this->update();
+				this->render();
+				SDL_RenderPresent(this->canvas);
+			}
 		}
 
 	private:
 		//initializing methods.
-		void initialize_window(const char* w_name, Point2& pos, Size2& size) {
-			this->window = SDL_CreateWindow(w_name, pos.x, pos.y, size.w, size.h, this->scr_mode);
+		void initialize_window(const std::string& w_name, Point2& pos, Size2& size) {
+			this->window = SDL_CreateWindow(w_name.c_str(), pos.x, pos.y, size.w, size.h, this->scr_mode);
 			if(this->window == NULL) {
 				throw exception::Window("Cannot to create window", SDL_GetError());
 			}
 		}
 
-		void initialize_canvas() {
-			this->canvas = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		void initialize_canvas(bool use_vsync) {
+			auto renderer_flags = use_vsync ? SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC : SDL_RENDERER_ACCELERATED;
+			this->canvas = SDL_CreateRenderer(this->window, -1, renderer_flags);
 			if(this->canvas == NULL) {
 				const char* error_msg = SDL_GetError();
 				// try to fix a problem

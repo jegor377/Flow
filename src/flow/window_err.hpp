@@ -5,7 +5,7 @@ namespace flow {
 
 		public:
 			//TODO: Find out why it doesn't work.
-			Window(std::string err_msg, const char* sdl_err_msg) {
+			Window(const std::string& err_msg, const char* sdl_err_msg) {
 				this->err_msg = err_msg + ". SDL2 error message: " + std::string(sdl_err_msg) + ".";
 			}
 

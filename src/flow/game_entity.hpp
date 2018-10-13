@@ -7,7 +7,7 @@ namespace flow {
 			this->engine = engine;
 		}
 
-		GameEntity(Flow* engine, Point pos, Size size, char* name, char* group) : Entity(pos, size, name, group) {
+		GameEntity(Flow* engine, Point pos, Size size, const std::string& name, const std::string& group) : Entity(pos, size, name, group) {
 			this->engine = engine;
 		}
 

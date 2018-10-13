@@ -4,33 +4,57 @@ namespace flow {
 		Point pos;
 		Size size;
 		
-		char* name;
-		char* group;
+		std::string name;
+		std::string group;
+
+		SpritePtr sprite;
+
+		bool is_handling_rendering;
+		bool is_handling_update;
+		bool is_handling_events;
+		bool is_handling_collisions;
+	private:
+		void set_default() {
+			this->sprite = NULL;
+			this->is_handling_rendering = true;
+			this->is_handling_update = true;
+			this->is_handling_events = true;
+			this->is_handling_collisions = true;
+		}
+
 	public:
-		Entity() {}
+		Entity() {
+			this->set_default();
+		}
 	
-		Entity(Point pos, Size size, char* name, char* group) {
+		Entity(Point pos, Size size, const std::string& name, const std::string& group) {
 			this->pos   = pos;
 			this->size  = size;
 			this->name  = name;
 			this->group = group;
-		}
-
-		Entity(const Entity& copy_entity) {
-			strcpy(this->name, copy_entity.name);
-			strcpy(this->group, copy_entity.group);
+			this->set_default();
 		}
 		
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event* event) = 0;
 		virtual void collision(Entity& body) = 0;
 
-		char* get_name() {
+		const std::string get_name() {
 			return this->name;
 		}
 
-		char* get_group() {
+		const std::string get_group() {
 			return this->group;
 		}
+
+		bool has_name(const std::string& name) {
+			return this->name == name;
+		}
+
+		bool is_in_group(const std::string& group) {
+			return this->group == group;
+		}
 	};
+
+	typedef std::shared_ptr<Entity> EntityPtr;
 }
