@@ -1,8 +1,8 @@
 # Flow (IN DEVELOP :/)
-Fatally Lazy On Wednesday - SDL2 based C++ game engine working in 3d space but rendering in fake "isometric" 2d graphics. Engine is standalone header file (.hpp) for C++.
+Fatally Lazy On Wednesday - SDL2 based C++ game engine working in 3D space but rendering in fake "isometric" 2d graphics. Engine is standalone header file (.hpp) for C++.
 
 ## Compiling
-You don't need actually to compile this code. Engine is standalone header file (.hpp) so you can just grab it from src/flow.hpp and include it in your project.
+You don't need actually to compile this code. **Engine is standalone header file (.hpp) so you can just grab it from src/flow.hpp and include it in your project.**
 
 But if you really want to work on this code then you need to know that the real sources of this engine is in src/flow directory. I recomend you to clone Wrapper CPP (https://github.com/jegor377/Wrapper-CPP), compile it and drop somewhere where you can use it easly (I've droped it into my system PATH). I use it to link all the headers into single header. It keeps things simple and nice.
 
