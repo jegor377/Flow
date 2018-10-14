@@ -2,6 +2,8 @@
 #include <exception>
 #include "flow.hpp"
 #include "sample/player.hpp"
+#include "sample/wall.hpp"
+#include "sample/floor.hpp"
 
 const bool DEBUG_MODE = true;
 
@@ -15,10 +17,13 @@ int main(int argc, char** argv) {
 		engine.create_window();
 		flow::log::info("Window created.");
 
-		engine.add_sprite("test", "test.png");
+		engine.add_sprite("wall", "wall.png");
+		engine.add_sprite("floor", "floor.png");
 		flow::log::info("Sprites loaded.");
 
 		engine.add_entity( std::make_shared<game::Player>(&engine) );
+		engine.add_entity( std::make_shared<game::Wall>(&engine) );
+		engine.add_entity( std::make_shared<game::Floor>(&engine) );
 
 		engine.game_loop();
 

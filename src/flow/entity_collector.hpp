@@ -105,7 +105,15 @@ namespace flow {
 
 		void sort() {
 			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
-				return e1->collider.z < e2->collider.z;
+				if(e1->collider.y > e2->collider.y) return true;
+				if(e1->collider.y == e2->collider.y) {
+					return e1->collider.z < e2->collider.z;
+				}
+				return false;
+				/*
+				It's very complicated. I don't understand it. I've done it by trying various combinations. I was tired.
+				TODO: Try to understand this and make description.
+				*/
 			});
 		}
 	};

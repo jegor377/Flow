@@ -6,8 +6,11 @@
 #include <exception>
 #include <algorithm>
 #include <memory>
+#include <initializer_list>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
+#include <iostream>
 
 // Wrapper CPP imports:
 //physical metrics
@@ -62,7 +65,7 @@ namespace flow {
 		FULL = 1
 	};
 
-	class Rect2 : public Point2, Size2 {
+	class Rect2 : public Point2, public Size2 {
 		SDL_Rect sdl_representation;
 	public:
 		RectMode mode;
@@ -80,6 +83,16 @@ namespace flow {
 				return &this->sdl_representation;
 			}
 			return NULL;
+		}
+
+		void set_pos(const Point2& new_pos) {
+			this->x = new_pos.x;
+			this->y = new_pos.y;
+		}
+
+		void set_size(const Size2& new_size) {
+			this->w = new_size.w;
+			this->h = new_size.h;
 		}
 
 		void add_pos(Rect2& other) {
@@ -123,7 +136,7 @@ namespace flow {
 		}
 	};
 
-	struct Rect : public Point, Size {
+	struct Rect : public Point, public Size {
 	public:
 		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
@@ -178,6 +191,12 @@ namespace flow {
 		Rect2* to_rect2() {
 			Rect2* result = new Rect2(this->x, this->y+this->z, this->w, this->h+this->l, SECTION);
 			return result;
+		}
+
+		Rect2* to_scaled_rect2(double scale) {
+			Rect2* result = this->to_rect2();
+			result->w *= scale;
+			result->h *= scale;
 		}
 
 		void set_pos(const Point& new_pos) {
@@ -305,16 +324,20 @@ namespace flow {
 	public:
 		SpritePtr sprite;
 		Rect2 source_section;
+		double scale;
 
 		SharedSprite() {
+			this->scale = 1;
 			this->sprite.reset();
 		}
 
 		SharedSprite(SpritePtr sprite) {
+			this->scale = 1;
 			this->sprite = sprite;
 		}
 
 		SharedSprite(SpritePtr sprite, Rect2 source_section) {
+			this->scale = 1;
 			this->sprite = sprite;
 			this->source_section = source_section;
 		}
@@ -599,7 +622,15 @@ namespace flow {
 
 		void sort() {
 			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
-				return e1->collider.z < e2->collider.z;
+				if(e1->collider.y > e2->collider.y) return true;
+				if(e1->collider.y == e2->collider.y) {
+					return e1->collider.z < e2->collider.z;
+				}
+				return false;
+				/*
+				It's very complicated. I don't understand it. I've done it by trying various combinations. I was tired.
+				TODO: Try to understand this and make description.
+				*/
 			});
 		}
 	};
@@ -683,6 +714,8 @@ namespace flow {
 		SpriteCollector sprite_collector;
 
 		bool is_fixable;
+
+		Rect2 window_rect;
 	public:
 		ScreenMode scr_mode;
 		bool is_running = true;
@@ -700,6 +733,8 @@ namespace flow {
 		}
 
 		void create_window(const std::string& w_name = "Sample", bool use_vsync=true, Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
+			this->window_rect.set_pos(pos);
+			this->window_rect.set_size(size);
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas(use_vsync);
@@ -739,6 +774,10 @@ namespace flow {
 			return sprite_collector.get(name);
 		}
 
+		Rect2 get_window_rect() {
+			return this->window_rect;
+		}
+
 		void game_loop() {
 			while(this->is_running) {
 				// Pulling events from event stack.
@@ -763,6 +802,7 @@ namespace flow {
 				}
 
 				// Present renderer (canvas) on screen.
+				SDL_RenderSetScale(this->canvas, 1, 1);
 				SDL_RenderPresent(this->canvas);
 
 				delete events;
@@ -799,7 +839,8 @@ namespace flow {
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;
 			Rect2& source_section = entity->shared_sprite.source_section;
-			auto destination_rect = entity->collider.to_rect2();
+			auto destination_rect = entity->collider.to_scaled_rect2(entity->shared_sprite.scale);
+			destination_rect->x -= destination_rect->w/2;
 			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
 			delete destination_rect;
 		}

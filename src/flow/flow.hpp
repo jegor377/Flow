@@ -6,8 +6,11 @@
 #include <exception>
 #include <algorithm>
 #include <memory>
+#include <initializer_list>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
+#include <iostream>
 
 // Wrapper CPP imports:
 //physical metrics
@@ -56,6 +59,8 @@ namespace flow {
 		SpriteCollector sprite_collector;
 
 		bool is_fixable;
+
+		Rect2 window_rect;
 	public:
 		ScreenMode scr_mode;
 		bool is_running = true;
@@ -73,6 +78,8 @@ namespace flow {
 		}
 
 		void create_window(const std::string& w_name = "Sample", bool use_vsync=true, Point2 pos=WINDOW_CENTER, Size2 size=Size2(640, 480), ScreenMode scr_mode = WINDOW) {
+			this->window_rect.set_pos(pos);
+			this->window_rect.set_size(size);
 			this->scr_mode = scr_mode;
 			this->initialize_window(w_name, pos, size);
 			this->initialize_canvas(use_vsync);
@@ -112,6 +119,10 @@ namespace flow {
 			return sprite_collector.get(name);
 		}
 
+		Rect2 get_window_rect() {
+			return this->window_rect;
+		}
+
 		void game_loop() {
 			while(this->is_running) {
 				// Pulling events from event stack.
@@ -136,6 +147,7 @@ namespace flow {
 				}
 
 				// Present renderer (canvas) on screen.
+				SDL_RenderSetScale(this->canvas, 1, 1);
 				SDL_RenderPresent(this->canvas);
 
 				delete events;
@@ -172,7 +184,8 @@ namespace flow {
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;
 			Rect2& source_section = entity->shared_sprite.source_section;
-			auto destination_rect = entity->collider.to_rect2();
+			auto destination_rect = entity->collider.to_scaled_rect2(entity->shared_sprite.scale);
+			destination_rect->x -= destination_rect->w/2;
 			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
 			delete destination_rect;
 		}

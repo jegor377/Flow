@@ -4,7 +4,7 @@ namespace flow {
 		FULL = 1
 	};
 
-	class Rect2 : public Point2, Size2 {
+	class Rect2 : public Point2, public Size2 {
 		SDL_Rect sdl_representation;
 	public:
 		RectMode mode;
@@ -22,6 +22,16 @@ namespace flow {
 				return &this->sdl_representation;
 			}
 			return NULL;
+		}
+
+		void set_pos(const Point2& new_pos) {
+			this->x = new_pos.x;
+			this->y = new_pos.y;
+		}
+
+		void set_size(const Size2& new_size) {
+			this->w = new_size.w;
+			this->h = new_size.h;
 		}
 
 		void add_pos(Rect2& other) {
@@ -65,7 +75,7 @@ namespace flow {
 		}
 	};
 
-	struct Rect : public Point, Size {
+	struct Rect : public Point, public Size {
 	public:
 		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
@@ -120,6 +130,12 @@ namespace flow {
 		Rect2* to_rect2() {
 			Rect2* result = new Rect2(this->x, this->y+this->z, this->w, this->h+this->l, SECTION);
 			return result;
+		}
+
+		Rect2* to_scaled_rect2(double scale) {
+			Rect2* result = this->to_rect2();
+			result->w *= scale;
+			result->h *= scale;
 		}
 
 		void set_pos(const Point& new_pos) {
