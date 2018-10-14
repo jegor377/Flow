@@ -1,9 +1,9 @@
 namespace flow {
 	class Size2 {
 	public:
-		int w; // width
-		int h; // height
-		Size2(int w=0, int h=0) {
+		double w; // width
+		double h; // height
+		Size2(double w=0, double h=0) {
 			this->w=w;
 			this->h=h;
 		}
@@ -11,9 +11,9 @@ namespace flow {
 
 	class Size : public Size2 {
 	public:
-		int l; // length
+		double l; // length
 
-		Size(int w=0, int h=0, int l=0) : Size2(w, h) {
+		Size(double w=0, double h=0, double l=0) : Size2(w, h) {
 			this->l=l;
 		}
 	};

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <deque>
 #include <vector>
 #include <string>
 #include <cstring>
@@ -36,6 +35,8 @@
 //collectors
 @import entity_collector;
 @import sprite_collector;
+//events
+@import event_list;
 
 namespace flow {
 	const Point2 WINDOW_CENTER(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -111,42 +112,71 @@ namespace flow {
 			return sprite_collector.get(name);
 		}
 
-		// game stuff
-		void handle_events() {
-			;
-		}
-
-		void update() {
-			const Uint64 ONE_SEC_IN_MS = 1000;
-			auto update_time_now = SDL_GetPerformanceCounter();
-			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
-			this->last_update_time = update_time_now;
-			for(auto entity : this->entity_collector.entities) {
-				if(entity->is_handling_update) {
-					entity->update(delta_time);
-				}
-			}
-		}
-
-		void handle_collisions() {
-			;
-		}
-
-		void render() {
-			;
-		}
-
 		void game_loop() {
 			while(this->is_running) {
+				// Pulling events from event stack.
+				auto events = this->get_events();
+
+				// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
+				this->entity_collector.sort();
+
+				// Calculate game delta time.
+				auto update_time_now = SDL_GetPerformanceCounter();
+				double delta_time = (double)(update_time_now - this->last_update_time) / (double)SDL_GetPerformanceFrequency();
+				this->last_update_time = update_time_now;
+
+				// Clear renderer (canvas).
 				SDL_RenderClear(this->canvas);
-				this->handle_events();
-				this->update();
-				this->render();
+
+				// Iteratre through all entities in order to update, handle events and copy their sprites into the screen:)
+				for(auto entity : this->entity_collector.entities) {
+					if(entity->is_handling_update) this->update(entity, delta_time);
+					if(entity->is_handling_events) this->handle_events(entity, events);
+					if(entity->is_handling_rendering) this->render(entity);
+				}
+
+				// Present renderer (canvas) on screen.
 				SDL_RenderPresent(this->canvas);
+
+				delete events;
 			}
 		}
 
 	private:
+		// game stuff
+		EventList* get_events() {
+			EventList* result = new EventList();
+			SDL_Event event;
+			while(SDL_PollEvent(&event)) {
+				result->add(event);
+			}
+			return result;
+		}
+
+		void handle_events(const EntityPtr& entity, EventList* events) {
+			for(auto event: events->get()) {
+				entity->event(event);
+			}
+		}
+
+		void update(const EntityPtr& entity, const double& delta_time) {
+			entity->update(delta_time);
+			if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
+		}
+
+
+		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
+			;
+		}
+
+		void render(const EntityPtr& entity) {
+			auto copy_texture = entity->shared_sprite.sprite->texture;
+			Rect2& source_section = entity->shared_sprite.source_section;
+			auto destination_rect = entity->collider.to_rect2();
+			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
+			delete destination_rect;
+		}
+
 		//initializing methods.
 		void initialize_window(const std::string& w_name, Point2& pos, Size2& size) {
 			this->window = SDL_CreateWindow(w_name.c_str(), pos.x, pos.y, size.w, size.h, this->scr_mode);

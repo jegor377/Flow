@@ -9,7 +9,7 @@ namespace flow {
 	public:
 		RectMode mode;
 
-		Rect2(int x=0, int y=0, int w=0, int h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
+		Rect2(double x=0, double y=0, double w=0, double h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
 			this->mode = mode;
 		};
 
@@ -23,17 +23,122 @@ namespace flow {
 			}
 			return NULL;
 		}
+
+		void add_pos(Rect2& other) {
+			this->x += other.x;
+			this->y += other.y;
+		}
+
+		void sub_pos(Rect2& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+		}
+
+		void mul_pos(Rect2& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+		}
+
+		void div_pos(Rect2& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+		}
+
+		void add_size(Rect2& other) {
+			this->w += other.w;
+			this->h += other.h;
+		}
+
+		void sub_size(Rect2& other) {
+			this->w -= other.w;
+			this->h -= other.h;
+		}
+
+		void mul_size(Rect2& other) {
+			this->w *= other.w;
+			this->h *= other.h;
+		}
+
+		void div_size(Rect2& other) {
+			this->w /= other.w;
+			this->h /= other.h;
+		}
 	};
 
 	struct Rect : public Point, Size {
 	public:
-		Rect(int x=0, int y=0, int z=0, int w=0, int h=0, int l=0) : Point(x, y, z), Size(w, h, l) {};
+		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
-		bool is_colliding(const Rect& other) {
+		void add_pos(Rect& other) {
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+		}
+
+		void sub_pos(Rect& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+		}
+
+		void mul_pos(Rect& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+		}
+
+		void div_pos(Rect& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+		}
+
+		void add_size(Rect& other) {
+			this->w += other.w;
+			this->h += other.h;
+			this->l += other.l;
+		}
+
+		void sub_size(Rect& other) {
+			this->w -= other.w;
+			this->h -= other.h;
+			this->l -= other.l;
+		}
+
+		void mul_size(Rect& other) {
+			this->w *= other.w;
+			this->h *= other.h;
+			this->l *= other.l;
+		}
+
+		void div_size(Rect& other) {
+			this->w /= other.w;
+			this->h /= other.h;
+			this->l /= other.l;
+		}
+
+		Rect2* to_rect2() {
+			Rect2* result = new Rect2(this->x, this->y+this->z, this->w, this->h+this->l, SECTION);
+			return result;
+		}
+
+		void set_pos(const Point& new_pos) {
+			this->x = new_pos.x;
+			this->y = new_pos.y;
+			this->z = new_pos.z;
+		}
+
+		void set_size(const Size& new_size) {
+			this->w = new_size.w;
+			this->h = new_size.h;
+			this->l = new_size.l;
+		}
+
+		bool is_colliding(Rect& other) {
 			return false;
 		}
 
-		bool is_colliding_with_point(const Point& pt) {
+		bool is_colliding_with_point(Point& pt) {
 			return false;
 		}
 	};

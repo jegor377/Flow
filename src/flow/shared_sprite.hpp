@@ -3,7 +3,6 @@ namespace flow {
 	public:
 		SpritePtr sprite;
 		Rect2 source_section;
-		Rect2 destination_section;
 
 		SharedSprite() {
 			this->sprite.reset();
@@ -13,10 +12,9 @@ namespace flow {
 			this->sprite = sprite;
 		}
 
-		SharedSprite(SpritePtr sprite, Rect2 source_section, Rect2 destination_section) {
+		SharedSprite(SpritePtr sprite, Rect2 source_section) {
 			this->sprite = sprite;
 			this->source_section = source_section;
-			this->destination_section = destination_section;
 		}
 
 		const Size2* get_size() {

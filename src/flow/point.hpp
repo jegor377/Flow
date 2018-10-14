@@ -1,10 +1,10 @@
 namespace flow {
 	class Point2 {
 	public:
-		int x;
-		int y;
+		double x;
+		double y;
 
-		Point2(int x=0, int y=0) {
+		Point2(double x=0, double y=0) {
 			this->x=x;
 			this->y=y;
 		}
@@ -12,8 +12,8 @@ namespace flow {
 
 	class Point : public Point2 {
 	public:
-		int z=0;
-		Point(int x=0, int y=0, int z=0) : Point2(x, y) {
+		double z=0;
+		Point(double x=0, double y=0, double z=0) : Point2(x, y) {
 			this->z = z;
 		}
 	};

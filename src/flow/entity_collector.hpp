@@ -4,7 +4,7 @@ namespace flow {
 		EntityPtr entity;
 	};
 
-	typedef std::deque<EntityPtr> EntityList;
+	typedef std::vector<EntityPtr> EntityList;
 	typedef std::vector<EntityPair> EntityMap;
 
 	class EntityCollector {
@@ -101,6 +101,12 @@ namespace flow {
 			}
 			if(result.size()==0) throw exception::EntityFindByGroup(group);
 			return result;
+		}
+
+		void sort() {
+			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
+				return e1->collider.z < e2->collider.z;
+			});
 		}
 	};
 }

@@ -7,12 +7,12 @@ namespace flow {
 			this->engine = engine;
 		}
 
-		GameEntity(Flow* engine, Point pos, Size size, const std::string& name, const std::string& group) : Entity(pos, size, name, group) {
+		GameEntity(Flow* engine, Rect collider, const std::string& name, const std::string& group) : Entity(collider, name, group) {
 			this->engine = engine;
 		}
 
 		virtual void update(double delta) = 0;
-		virtual void event(SDL_Event* event) = 0;
+		virtual void event(SDL_Event event) = 0;
 		virtual void collision(Entity& body) = 0;
 	};
 }

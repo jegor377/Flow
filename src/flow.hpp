@@ -1,6 +1,5 @@
 #pragma once
 
-#include <deque>
 #include <vector>
 #include <string>
 #include <cstring>
@@ -15,10 +14,10 @@
 namespace flow {
 	class Point2 {
 	public:
-		int x;
-		int y;
+		double x;
+		double y;
 
-		Point2(int x=0, int y=0) {
+		Point2(double x=0, double y=0) {
 			this->x=x;
 			this->y=y;
 		}
@@ -26,23 +25,23 @@ namespace flow {
 
 	class Point : public Point2 {
 	public:
-		int z=0;
-		Point(int x=0, int y=0, int z=0) : Point2(x, y) {
+		double z=0;
+		Point(double x=0, double y=0, double z=0) : Point2(x, y) {
 			this->z = z;
 		}
 	};
 }
 namespace flow {
 	class Vector : public Point {
-		Vector(int x=0, int y=0, int z=0) : Point(x, y, z) {};
+		Vector(double x=0, double y=0, double z=0) : Point(x, y, z) {};
 	};
 }
 namespace flow {
 	class Size2 {
 	public:
-		int w; // width
-		int h; // height
-		Size2(int w=0, int h=0) {
+		double w; // width
+		double h; // height
+		Size2(double w=0, double h=0) {
 			this->w=w;
 			this->h=h;
 		}
@@ -50,9 +49,9 @@ namespace flow {
 
 	class Size : public Size2 {
 	public:
-		int l; // length
+		double l; // length
 
-		Size(int w=0, int h=0, int l=0) : Size2(w, h) {
+		Size(double w=0, double h=0, double l=0) : Size2(w, h) {
 			this->l=l;
 		}
 	};
@@ -68,7 +67,7 @@ namespace flow {
 	public:
 		RectMode mode;
 
-		Rect2(int x=0, int y=0, int w=0, int h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
+		Rect2(double x=0, double y=0, double w=0, double h=0, RectMode mode=FULL) : Point2(x, y), Size2(w, h) {
 			this->mode = mode;
 		};
 
@@ -82,17 +81,122 @@ namespace flow {
 			}
 			return NULL;
 		}
+
+		void add_pos(Rect2& other) {
+			this->x += other.x;
+			this->y += other.y;
+		}
+
+		void sub_pos(Rect2& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+		}
+
+		void mul_pos(Rect2& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+		}
+
+		void div_pos(Rect2& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+		}
+
+		void add_size(Rect2& other) {
+			this->w += other.w;
+			this->h += other.h;
+		}
+
+		void sub_size(Rect2& other) {
+			this->w -= other.w;
+			this->h -= other.h;
+		}
+
+		void mul_size(Rect2& other) {
+			this->w *= other.w;
+			this->h *= other.h;
+		}
+
+		void div_size(Rect2& other) {
+			this->w /= other.w;
+			this->h /= other.h;
+		}
 	};
 
 	struct Rect : public Point, Size {
 	public:
-		Rect(int x=0, int y=0, int z=0, int w=0, int h=0, int l=0) : Point(x, y, z), Size(w, h, l) {};
+		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
-		bool is_colliding(const Rect& other) {
+		void add_pos(Rect& other) {
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+		}
+
+		void sub_pos(Rect& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+		}
+
+		void mul_pos(Rect& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+		}
+
+		void div_pos(Rect& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+		}
+
+		void add_size(Rect& other) {
+			this->w += other.w;
+			this->h += other.h;
+			this->l += other.l;
+		}
+
+		void sub_size(Rect& other) {
+			this->w -= other.w;
+			this->h -= other.h;
+			this->l -= other.l;
+		}
+
+		void mul_size(Rect& other) {
+			this->w *= other.w;
+			this->h *= other.h;
+			this->l *= other.l;
+		}
+
+		void div_size(Rect& other) {
+			this->w /= other.w;
+			this->h /= other.h;
+			this->l /= other.l;
+		}
+
+		Rect2* to_rect2() {
+			Rect2* result = new Rect2(this->x, this->y+this->z, this->w, this->h+this->l, SECTION);
+			return result;
+		}
+
+		void set_pos(const Point& new_pos) {
+			this->x = new_pos.x;
+			this->y = new_pos.y;
+			this->z = new_pos.z;
+		}
+
+		void set_size(const Size& new_size) {
+			this->w = new_size.w;
+			this->h = new_size.h;
+			this->l = new_size.l;
+		}
+
+		bool is_colliding(Rect& other) {
 			return false;
 		}
 
-		bool is_colliding_with_point(const Point& pt) {
+		bool is_colliding_with_point(Point& pt) {
 			return false;
 		}
 	};
@@ -171,6 +275,7 @@ namespace flow {
 		}
 	public:
 		friend class SpriteCollector;
+		friend class Flow;
 
 		const Size2* get_size() {
 			if(this->texture != NULL) {
@@ -200,7 +305,6 @@ namespace flow {
 	public:
 		SpritePtr sprite;
 		Rect2 source_section;
-		Rect2 destination_section;
 
 		SharedSprite() {
 			this->sprite.reset();
@@ -210,10 +314,9 @@ namespace flow {
 			this->sprite = sprite;
 		}
 
-		SharedSprite(SpritePtr sprite, Rect2 source_section, Rect2 destination_section) {
+		SharedSprite(SpritePtr sprite, Rect2 source_section) {
 			this->sprite = sprite;
 			this->source_section = source_section;
-			this->destination_section = destination_section;
 		}
 
 		const Size2* get_size() {
@@ -241,12 +344,11 @@ namespace flow {
 namespace flow {
 	class Entity {
 	protected:
-		Point pos;
-		Size size;
-		
 		std::string name;
 		std::string group;
 	public:
+		Rect collider;
+
 		SharedSprite shared_sprite;
 		
 		bool is_handling_rendering;
@@ -266,16 +368,15 @@ namespace flow {
 			this->set_default();
 		}
 	
-		Entity(Point pos, Size size, const std::string& name, const std::string& group) {
-			this->pos   = pos;
-			this->size  = size;
-			this->name  = name;
+		Entity(Rect collider, const std::string& name, const std::string& group) {
+			this->collider = collider;
+			this->name = name;
 			this->group = group;
 			this->set_default();
 		}
 		
 		virtual void update(double delta) = 0;
-		virtual void event(SDL_Event* event) = 0;
+		virtual void event(SDL_Event event) = 0;
 		virtual void collision(Entity& body) = 0;
 
 		const std::string get_name() {
@@ -397,7 +498,7 @@ namespace flow {
 		EntityPtr entity;
 	};
 
-	typedef std::deque<EntityPtr> EntityList;
+	typedef std::vector<EntityPtr> EntityList;
 	typedef std::vector<EntityPair> EntityMap;
 
 	class EntityCollector {
@@ -495,6 +596,12 @@ namespace flow {
 			if(result.size()==0) throw exception::EntityFindByGroup(group);
 			return result;
 		}
+
+		void sort() {
+			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
+				return e1->collider.z < e2->collider.z;
+			});
+		}
 	};
 }
 namespace flow {
@@ -535,6 +642,25 @@ namespace flow {
 				return sprite_iterator;
 			}
 			throw exception::SpriteFind(name);
+		}
+	};
+}
+//events
+namespace flow {
+	class EventList {
+		std::vector<SDL_Event> events;
+
+	public:
+		~EventList() {
+			this->events.clear();
+		}
+
+		void add(SDL_Event event) {
+			this->events.push_back(event);
+		}
+
+		std::vector<SDL_Event> get() {
+			return this->events;
 		}
 	};
 }
@@ -613,42 +739,71 @@ namespace flow {
 			return sprite_collector.get(name);
 		}
 
-		// game stuff
-		void handle_events() {
-			;
-		}
-
-		void update() {
-			const Uint64 ONE_SEC_IN_MS = 1000;
-			auto update_time_now = SDL_GetPerformanceCounter();
-			double delta_time = (double)((update_time_now - this->last_update_time)*ONE_SEC_IN_MS) / (double)SDL_GetPerformanceFrequency();
-			this->last_update_time = update_time_now;
-			for(auto entity : this->entity_collector.entities) {
-				if(entity->is_handling_update) {
-					entity->update(delta_time);
-				}
-			}
-		}
-
-		void handle_collisions() {
-			;
-		}
-
-		void render() {
-			;
-		}
-
 		void game_loop() {
 			while(this->is_running) {
+				// Pulling events from event stack.
+				auto events = this->get_events();
+
+				// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
+				this->entity_collector.sort();
+
+				// Calculate game delta time.
+				auto update_time_now = SDL_GetPerformanceCounter();
+				double delta_time = (double)(update_time_now - this->last_update_time) / (double)SDL_GetPerformanceFrequency();
+				this->last_update_time = update_time_now;
+
+				// Clear renderer (canvas).
 				SDL_RenderClear(this->canvas);
-				this->handle_events();
-				this->update();
-				this->render();
+
+				// Iteratre through all entities in order to update, handle events and copy their sprites into the screen:)
+				for(auto entity : this->entity_collector.entities) {
+					if(entity->is_handling_update) this->update(entity, delta_time);
+					if(entity->is_handling_events) this->handle_events(entity, events);
+					if(entity->is_handling_rendering) this->render(entity);
+				}
+
+				// Present renderer (canvas) on screen.
 				SDL_RenderPresent(this->canvas);
+
+				delete events;
 			}
 		}
 
 	private:
+		// game stuff
+		EventList* get_events() {
+			EventList* result = new EventList();
+			SDL_Event event;
+			while(SDL_PollEvent(&event)) {
+				result->add(event);
+			}
+			return result;
+		}
+
+		void handle_events(const EntityPtr& entity, EventList* events) {
+			for(auto event: events->get()) {
+				entity->event(event);
+			}
+		}
+
+		void update(const EntityPtr& entity, const double& delta_time) {
+			entity->update(delta_time);
+			if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
+		}
+
+
+		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
+			;
+		}
+
+		void render(const EntityPtr& entity) {
+			auto copy_texture = entity->shared_sprite.sprite->texture;
+			Rect2& source_section = entity->shared_sprite.source_section;
+			auto destination_rect = entity->collider.to_rect2();
+			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
+			delete destination_rect;
+		}
+
 		//initializing methods.
 		void initialize_window(const std::string& w_name, Point2& pos, Size2& size) {
 			this->window = SDL_CreateWindow(w_name.c_str(), pos.x, pos.y, size.w, size.h, this->scr_mode);
@@ -727,12 +882,12 @@ namespace flow {
 			this->engine = engine;
 		}
 
-		GameEntity(Flow* engine, Point pos, Size size, const std::string& name, const std::string& group) : Entity(pos, size, name, group) {
+		GameEntity(Flow* engine, Rect collider, const std::string& name, const std::string& group) : Entity(collider, name, group) {
 			this->engine = engine;
 		}
 
 		virtual void update(double delta) = 0;
-		virtual void event(SDL_Event* event) = 0;
+		virtual void event(SDL_Event event) = 0;
 		virtual void collision(Entity& body) = 0;
 	};
 }

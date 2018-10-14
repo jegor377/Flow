@@ -23,6 +23,7 @@ namespace flow {
 		}
 	public:
 		friend class SpriteCollector;
+		friend class Flow;
 
 		const Size2* get_size() {
 			if(this->texture != NULL) {

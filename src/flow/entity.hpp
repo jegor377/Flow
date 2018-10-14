@@ -1,12 +1,11 @@
 namespace flow {
 	class Entity {
 	protected:
-		Point pos;
-		Size size;
-		
 		std::string name;
 		std::string group;
 	public:
+		Rect collider;
+
 		SharedSprite shared_sprite;
 		
 		bool is_handling_rendering;
@@ -26,16 +25,15 @@ namespace flow {
 			this->set_default();
 		}
 	
-		Entity(Point pos, Size size, const std::string& name, const std::string& group) {
-			this->pos   = pos;
-			this->size  = size;
-			this->name  = name;
+		Entity(Rect collider, const std::string& name, const std::string& group) {
+			this->collider = collider;
+			this->name = name;
 			this->group = group;
 			this->set_default();
 		}
 		
 		virtual void update(double delta) = 0;
-		virtual void event(SDL_Event* event) = 0;
+		virtual void event(SDL_Event event) = 0;
 		virtual void collision(Entity& body) = 0;
 
 		const std::string get_name() {
