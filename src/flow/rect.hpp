@@ -121,6 +121,12 @@ namespace flow {
 			this->l *= other.l;
 		}
 
+		void mul_size_by_scale(Vector& other) {
+			this->w *= other.x;
+			this->h *= other.y;
+			this->l *= other.z;
+		}
+
 		void div_size(Rect& other) {
 			this->w /= other.w;
 			this->h /= other.h;
@@ -132,10 +138,9 @@ namespace flow {
 			return result;
 		}
 
-		Rect2* to_scaled_rect2(double scale) {
-			Rect2* result = this->to_rect2();
-			result->w *= scale;
-			result->h *= scale;
+		Rect2* to_scaled_rect2(Vector scale) {
+			Rect2* result = new Rect2(this->x, this->y+this->z, this->w*scale.x, (this->h*scale.y)+(this->l*scale.z), SECTION);
+			return result;
 		}
 
 		void set_pos(const Point& new_pos) {
@@ -151,11 +156,22 @@ namespace flow {
 		}
 
 		bool is_colliding(Rect& other) {
-			return false;
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->y < other.y + other.h && this->y + this->h > other.y && this->z < other.z + other.l && this->z + this->l > other.z;
 		}
 
 		bool is_colliding_with_point(Point& pt) {
-			return false;
+			bool is_x_collision = this->x<=pt.x && this->x+this->w>=pt.x;
+			bool is_y_collision = this->y<=pt.y && this->y+this->h>=pt.y;
+			bool is_z_collision = this->z<=pt.z && this->z+this->l>=pt.z;
+			return is_x_collision && is_y_collision && is_z_collision;
+		}
+
+		bool is_in_xy_collision(Rect& other) {
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->y < other.y + other.h && this->y + this->h > other.y;
+		}
+
+		bool is_in_xz_collision(Rect& other) {
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->z < other.z + other.l && this->z + this->l > other.z;
 		}
 	};
 }

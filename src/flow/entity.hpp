@@ -12,8 +12,11 @@ namespace flow {
 		bool is_handling_update;
 		bool is_handling_events;
 		bool is_handling_collisions;
+
+		Vector scale;
 	private:
 		void set_default() {
+			this->scale = Vector(1, 1, 1);
 			this->is_handling_rendering = true;
 			this->is_handling_update = true;
 			this->is_handling_events = true;
@@ -34,7 +37,7 @@ namespace flow {
 		
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(Entity& body) = 0;
+		virtual void collision(std::shared_ptr<Entity> body) = 0;
 
 		const std::string get_name() {
 			return this->name;
@@ -50,6 +53,22 @@ namespace flow {
 
 		bool is_in_group(const std::string& group) {
 			return this->group == group;
+		}
+
+		bool is_in_xy_collision(std::shared_ptr<Entity> body) {
+			Rect other_scaled_rect = body->collider;
+			other_scaled_rect.mul_size_by_scale(body->scale);
+			Rect this_scaled_rect = this->collider;
+			this_scaled_rect.mul_size_by_scale(this->scale);
+			return this_scaled_rect.is_in_xy_collision(other_scaled_rect);
+		}
+
+		bool is_in_xz_collision(std::shared_ptr<Entity> body) {
+			Rect other_scaled_rect = body->collider;
+			other_scaled_rect.mul_size_by_scale(body->scale);
+			Rect this_scaled_rect = this->collider;
+			this_scaled_rect.mul_size_by_scale(this->scale);
+			return this_scaled_rect.is_in_xz_collision(other_scaled_rect);
 		}
 	};
 

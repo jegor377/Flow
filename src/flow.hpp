@@ -36,8 +36,14 @@ namespace flow {
 }
 namespace flow {
 	class Vector : public Point {
+	public:
 		Vector(double x=0, double y=0, double z=0) : Point(x, y, z) {};
 	};
+
+	Vector new_scale(double scale) {
+		Vector result(scale, scale, scale);
+		return result;
+	}
 }
 namespace flow {
 	class Size2 {
@@ -182,6 +188,12 @@ namespace flow {
 			this->l *= other.l;
 		}
 
+		void mul_size_by_scale(Vector& other) {
+			this->w *= other.x;
+			this->h *= other.y;
+			this->l *= other.z;
+		}
+
 		void div_size(Rect& other) {
 			this->w /= other.w;
 			this->h /= other.h;
@@ -193,10 +205,9 @@ namespace flow {
 			return result;
 		}
 
-		Rect2* to_scaled_rect2(double scale) {
-			Rect2* result = this->to_rect2();
-			result->w *= scale;
-			result->h *= scale;
+		Rect2* to_scaled_rect2(Vector scale) {
+			Rect2* result = new Rect2(this->x, this->y+this->z, this->w*scale.x, (this->h*scale.y)+(this->l*scale.z), SECTION);
+			return result;
 		}
 
 		void set_pos(const Point& new_pos) {
@@ -212,11 +223,22 @@ namespace flow {
 		}
 
 		bool is_colliding(Rect& other) {
-			return false;
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->y < other.y + other.h && this->y + this->h > other.y && this->z < other.z + other.l && this->z + this->l > other.z;
 		}
 
 		bool is_colliding_with_point(Point& pt) {
-			return false;
+			bool is_x_collision = this->x<=pt.x && this->x+this->w>=pt.x;
+			bool is_y_collision = this->y<=pt.y && this->y+this->h>=pt.y;
+			bool is_z_collision = this->z<=pt.z && this->z+this->l>=pt.z;
+			return is_x_collision && is_y_collision && is_z_collision;
+		}
+
+		bool is_in_xy_collision(Rect& other) {
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->y < other.y + other.h && this->y + this->h > other.y;
+		}
+
+		bool is_in_xz_collision(Rect& other) {
+			return this->x < other.x + other.w && this->x + this->w > other.x && this->z < other.z + other.l && this->z + this->l > other.z;
 		}
 	};
 }
@@ -324,20 +346,16 @@ namespace flow {
 	public:
 		SpritePtr sprite;
 		Rect2 source_section;
-		double scale;
 
 		SharedSprite() {
-			this->scale = 1;
 			this->sprite.reset();
 		}
 
 		SharedSprite(SpritePtr sprite) {
-			this->scale = 1;
 			this->sprite = sprite;
 		}
 
 		SharedSprite(SpritePtr sprite, Rect2 source_section) {
-			this->scale = 1;
 			this->sprite = sprite;
 			this->source_section = source_section;
 		}
@@ -378,8 +396,11 @@ namespace flow {
 		bool is_handling_update;
 		bool is_handling_events;
 		bool is_handling_collisions;
+
+		Vector scale;
 	private:
 		void set_default() {
+			this->scale = Vector(1, 1, 1);
 			this->is_handling_rendering = true;
 			this->is_handling_update = true;
 			this->is_handling_events = true;
@@ -400,7 +421,7 @@ namespace flow {
 		
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(Entity& body) = 0;
+		virtual void collision(std::shared_ptr<Entity> body) = 0;
 
 		const std::string get_name() {
 			return this->name;
@@ -416,6 +437,22 @@ namespace flow {
 
 		bool is_in_group(const std::string& group) {
 			return this->group == group;
+		}
+
+		bool is_in_xy_collision(std::shared_ptr<Entity> body) {
+			Rect other_scaled_rect = body->collider;
+			other_scaled_rect.mul_size_by_scale(body->scale);
+			Rect this_scaled_rect = this->collider;
+			this_scaled_rect.mul_size_by_scale(this->scale);
+			return this_scaled_rect.is_in_xy_collision(other_scaled_rect);
+		}
+
+		bool is_in_xz_collision(std::shared_ptr<Entity> body) {
+			Rect other_scaled_rect = body->collider;
+			other_scaled_rect.mul_size_by_scale(body->scale);
+			Rect this_scaled_rect = this->collider;
+			this_scaled_rect.mul_size_by_scale(this->scale);
+			return this_scaled_rect.is_in_xz_collision(other_scaled_rect);
 		}
 	};
 
@@ -620,18 +657,17 @@ namespace flow {
 			return result;
 		}
 
-		void sort() {
-			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
-				if(e1->collider.y > e2->collider.y) return true;
-				if(e1->collider.y == e2->collider.y) {
-					return e1->collider.z < e2->collider.z;
+		EntityList sort() {
+			EntityList result = this->entities;
+			std::sort(result.begin(), result.end(), [](EntityPtr& e1, EntityPtr& e2){
+				const double e1_y_point = (e1->collider.y+e1->collider.h*e1->scale.y/2);
+				const double e2_y_point = (e2->collider.y+e2->collider.h*e2->scale.y/2);
+				if(e1->is_in_xy_collision(e2)) {
+					return e1->collider.z <= e2->collider.z;
 				}
-				return false;
-				/*
-				It's very complicated. I don't understand it. I've done it by trying various combinations. I was tired.
-				TODO: Try to understand this and make description.
-				*/
+				return e1_y_point > e2_y_point;
 			});
+			return result;
 		}
 	};
 }
@@ -714,6 +750,7 @@ namespace flow {
 		SpriteCollector sprite_collector;
 
 		bool is_fixable;
+		bool debug;
 
 		Rect2 window_rect;
 	public:
@@ -721,7 +758,8 @@ namespace flow {
 		bool is_running = true;
 		Uint64 last_update_time;
 
-		Flow(bool is_fixable=true) {
+		Flow(bool is_fixable=true, bool debug=false) {
+			this->debug = debug;
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
 			this->last_update_time = SDL_GetPerformanceCounter();
@@ -745,19 +783,19 @@ namespace flow {
 			entity_collector.add(entity);
 		}
 
-		void remove_entity_by_name(char* name) {
+		void remove_entity_by_name(const std::string& name) {
 			entity_collector.remove_by_name(name);
 		}
 
-		void remove_entities_by_group(char* group) {
+		void remove_entities_by_group(const std::string& group) {
 			entity_collector.remove_by_group(group);
 		}
 
-		EntityPtr get_entity_by_name(char* name) {
+		EntityPtr get_entity_by_name(const std::string& name) {
 			return entity_collector.get_by_name(name);
 		}
 
-		EntityMap get_entities_by_group(char* group) {
+		EntityMap get_entities_by_group(const std::string& group) {
 			return entity_collector.get_by_group(group);
 		}
 
@@ -784,7 +822,7 @@ namespace flow {
 				auto events = this->get_events();
 
 				// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
-				this->entity_collector.sort();
+				auto entities_copy = this->entity_collector.sort();
 
 				// Calculate game delta time.
 				auto update_time_now = SDL_GetPerformanceCounter();
@@ -792,17 +830,17 @@ namespace flow {
 				this->last_update_time = update_time_now;
 
 				// Clear renderer (canvas).
+				if(this->debug) SDL_SetRenderDrawColor(this->canvas, 0, 0, 0, 0);
 				SDL_RenderClear(this->canvas);
 
 				// Iteratre through all entities in order to update, handle events and copy their sprites into the screen:)
-				for(auto entity : this->entity_collector.entities) {
+				for(auto entity : entities_copy) {
 					if(entity->is_handling_update) this->update(entity, delta_time);
 					if(entity->is_handling_events) this->handle_events(entity, events);
 					if(entity->is_handling_rendering) this->render(entity);
 				}
 
 				// Present renderer (canvas) on screen.
-				SDL_RenderSetScale(this->canvas, 1, 1);
 				SDL_RenderPresent(this->canvas);
 
 				delete events;
@@ -833,15 +871,30 @@ namespace flow {
 
 
 		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
-			;
+			for(auto _entity: this->entity_collector.entities) {
+				if(_entity.get() != entity.get()) {
+					if(entity->collider.is_colliding(_entity->collider)) {
+						entity->collision(_entity);
+					}
+				}
+			}
 		}
 
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;
 			Rect2& source_section = entity->shared_sprite.source_section;
-			auto destination_rect = entity->collider.to_scaled_rect2(entity->shared_sprite.scale);
-			destination_rect->x -= destination_rect->w/2;
+			auto destination_rect = entity->collider.to_scaled_rect2(entity->scale);
 			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
+			if(this->debug) {
+				SDL_SetRenderDrawColor(this->canvas, 255, 0, 0, 255);
+				SDL_Rect point = {
+					(int)(destination_rect->x+destination_rect->w/2),
+					(int)(destination_rect->y+destination_rect->h/2+entity->collider.l*entity->scale.y/2),
+					3,
+					3
+				};
+				SDL_RenderFillRect(this->canvas, &point);
+			}
 			delete destination_rect;
 		}
 
@@ -929,6 +982,6 @@ namespace flow {
 
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(Entity& body) = 0;
+		virtual void collision(EntityPtr body) = 0;
 	};
 }

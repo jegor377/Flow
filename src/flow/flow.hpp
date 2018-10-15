@@ -59,6 +59,7 @@ namespace flow {
 		SpriteCollector sprite_collector;
 
 		bool is_fixable;
+		bool debug;
 
 		Rect2 window_rect;
 	public:
@@ -66,7 +67,8 @@ namespace flow {
 		bool is_running = true;
 		Uint64 last_update_time;
 
-		Flow(bool is_fixable=true) {
+		Flow(bool is_fixable=true, bool debug=false) {
+			this->debug = debug;
 			this->is_fixable = is_fixable;
 			this->scr_mode = WINDOW;
 			this->last_update_time = SDL_GetPerformanceCounter();
@@ -90,19 +92,19 @@ namespace flow {
 			entity_collector.add(entity);
 		}
 
-		void remove_entity_by_name(char* name) {
+		void remove_entity_by_name(const std::string& name) {
 			entity_collector.remove_by_name(name);
 		}
 
-		void remove_entities_by_group(char* group) {
+		void remove_entities_by_group(const std::string& group) {
 			entity_collector.remove_by_group(group);
 		}
 
-		EntityPtr get_entity_by_name(char* name) {
+		EntityPtr get_entity_by_name(const std::string& name) {
 			return entity_collector.get_by_name(name);
 		}
 
-		EntityMap get_entities_by_group(char* group) {
+		EntityMap get_entities_by_group(const std::string& group) {
 			return entity_collector.get_by_group(group);
 		}
 
@@ -129,7 +131,7 @@ namespace flow {
 				auto events = this->get_events();
 
 				// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
-				this->entity_collector.sort();
+				auto entities_copy = this->entity_collector.sort();
 
 				// Calculate game delta time.
 				auto update_time_now = SDL_GetPerformanceCounter();
@@ -137,17 +139,17 @@ namespace flow {
 				this->last_update_time = update_time_now;
 
 				// Clear renderer (canvas).
+				if(this->debug) SDL_SetRenderDrawColor(this->canvas, 0, 0, 0, 0);
 				SDL_RenderClear(this->canvas);
 
 				// Iteratre through all entities in order to update, handle events and copy their sprites into the screen:)
-				for(auto entity : this->entity_collector.entities) {
+				for(auto entity : entities_copy) {
 					if(entity->is_handling_update) this->update(entity, delta_time);
 					if(entity->is_handling_events) this->handle_events(entity, events);
 					if(entity->is_handling_rendering) this->render(entity);
 				}
 
 				// Present renderer (canvas) on screen.
-				SDL_RenderSetScale(this->canvas, 1, 1);
 				SDL_RenderPresent(this->canvas);
 
 				delete events;
@@ -178,15 +180,30 @@ namespace flow {
 
 
 		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
-			;
+			for(auto _entity: this->entity_collector.entities) {
+				if(_entity.get() != entity.get()) {
+					if(entity->collider.is_colliding(_entity->collider)) {
+						entity->collision(_entity);
+					}
+				}
+			}
 		}
 
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;
 			Rect2& source_section = entity->shared_sprite.source_section;
-			auto destination_rect = entity->collider.to_scaled_rect2(entity->shared_sprite.scale);
-			destination_rect->x -= destination_rect->w/2;
+			auto destination_rect = entity->collider.to_scaled_rect2(entity->scale);
 			SDL_RenderCopyEx(this->canvas, copy_texture, source_section.get_sdl_rect(), destination_rect->get_sdl_rect(), 0.0, NULL, SDL_FLIP_NONE);
+			if(this->debug) {
+				SDL_SetRenderDrawColor(this->canvas, 255, 0, 0, 255);
+				SDL_Rect point = {
+					(int)(destination_rect->x+destination_rect->w/2),
+					(int)(destination_rect->y+destination_rect->h/2+entity->collider.l*entity->scale.y/2),
+					3,
+					3
+				};
+				SDL_RenderFillRect(this->canvas, &point);
+			}
 			delete destination_rect;
 		}
 

@@ -3,20 +3,16 @@ namespace flow {
 	public:
 		SpritePtr sprite;
 		Rect2 source_section;
-		double scale;
 
 		SharedSprite() {
-			this->scale = 1;
 			this->sprite.reset();
 		}
 
 		SharedSprite(SpritePtr sprite) {
-			this->scale = 1;
 			this->sprite = sprite;
 		}
 
 		SharedSprite(SpritePtr sprite, Rect2 source_section) {
-			this->scale = 1;
 			this->sprite = sprite;
 			this->source_section = source_section;
 		}

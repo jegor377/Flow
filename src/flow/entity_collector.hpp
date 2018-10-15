@@ -103,18 +103,17 @@ namespace flow {
 			return result;
 		}
 
-		void sort() {
-			std::sort(this->entities.begin(), this->entities.end(), [](EntityPtr& e1, EntityPtr& e2){
-				if(e1->collider.y > e2->collider.y) return true;
-				if(e1->collider.y == e2->collider.y) {
-					return e1->collider.z < e2->collider.z;
+		EntityList sort() {
+			EntityList result = this->entities;
+			std::sort(result.begin(), result.end(), [](EntityPtr& e1, EntityPtr& e2){
+				const double e1_y_point = (e1->collider.y+e1->collider.h*e1->scale.y/2);
+				const double e2_y_point = (e2->collider.y+e2->collider.h*e2->scale.y/2);
+				if(e1->is_in_xy_collision(e2)) {
+					return e1->collider.z <= e2->collider.z;
 				}
-				return false;
-				/*
-				It's very complicated. I don't understand it. I've done it by trying various combinations. I was tired.
-				TODO: Try to understand this and make description.
-				*/
+				return e1_y_point > e2_y_point;
 			});
+			return result;
 		}
 	};
 }
