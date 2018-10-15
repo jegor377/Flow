@@ -33,6 +33,7 @@ namespace game {
 						bounce_vel.mul_by_val(BOUNCE);
 						bounce_vel.add(this->velocity);
 						this->velocity.sub(bounce_vel);
+						if(this->velocity.y<0) this->velocity.y = 0;
 					}
 				}
 			}
