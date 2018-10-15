@@ -12,7 +12,6 @@ namespace game {
 			this->shared_sprite.sprite = this->engine->get_sprite("wall");
 			this->collider.set_pos(flow::Point(x, 100, 70));
 			this->collider.set_size(flow::Size(80, 100, 20));
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {
@@ -20,7 +19,6 @@ namespace game {
 		}
 		void event(SDL_Event event) {
 		}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 
 	class Leg : public flow::GameEntity {
@@ -31,18 +29,13 @@ namespace game {
 			this->shared_sprite.sprite = this->engine->get_sprite("wall");
 			this->collider.set_pos(flow::Point(200+x_off, 101, 0+z_off));
 			this->collider.set_size(flow::Size(80, 100, 20));
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {
 			//this->collider.x += 3*delta;
 		}
 		void event(SDL_Event event) {
-			if(event.type == SDL_MOUSEBUTTONDOWN) {
-				std::cout<<"L("+this->get_name()+"): y="<<this->collider.y<<", z="<<this->collider.z<<std::endl;
-			}
 		}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 
 	class SpecialLeg : public flow::GameEntity {
@@ -54,7 +47,6 @@ namespace game {
 			this->shared_sprite.sprite = this->engine->get_sprite("wall");
 			this->collider.set_pos(flow::Point(200+x_off, 102, 0+z_off));
 			this->collider.set_size(flow::Size(80, 100, 20));
-			this->is_handling_collisions = false;
 			this->scale = flow::new_scale(1.05);
 		}
 
@@ -74,12 +66,6 @@ namespace game {
 			}
 		}
 		void event(SDL_Event event) {
-			if(event.type == SDL_MOUSEBUTTONDOWN) {
-				std::cout<<"SL: y="<<this->collider.y<<", z="<<this->collider.z<<std::endl;
-			}
-		}
-		void collision(flow::EntityPtr body) {
-			flow::log::info("Body with name "+this->get_name()+" reported collision collision with "+body->get_name());
 		}
 	};
 
@@ -92,7 +78,6 @@ namespace game {
 			this->shared_sprite.sprite = this->engine->get_sprite("wall");
 			this->collider.set_pos(flow::Point(200+x_off, 75, 0+z_off));
 			this->collider.set_size(flow::Size(80, 100, 20));
-			this->is_handling_collisions = false;
 			this->scale = flow::new_scale(1.1);
 		}
 
@@ -113,6 +98,5 @@ namespace game {
 		}
 		void event(SDL_Event event) {
 		}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 }

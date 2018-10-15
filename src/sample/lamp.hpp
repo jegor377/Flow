@@ -13,12 +13,10 @@ namespace game {
 			this->collider.set_pos(flow::Point(x, 100, 0));
 			this->collider.set_size(flow::Size(50, 50, 10));
 			this->scale=flow::new_scale(0.5);
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {}
 		void event(SDL_Event event) {}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 
 	class Lamp2 : public flow::GameEntity {
@@ -30,7 +28,6 @@ namespace game {
 			this->collider.set_pos(flow::Point(x, 80, 49));
 			this->collider.set_size(flow::Size(50, 50, 10));
 			this->scale=flow::new_scale(0.7);
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {
@@ -39,6 +36,5 @@ namespace game {
 			}
 		}
 		void event(SDL_Event event) {}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 }

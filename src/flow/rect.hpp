@@ -79,7 +79,37 @@ namespace flow {
 	public:
 		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
+		void add_val(double x) {
+			this->x += x;
+			this->y += x;
+			this->z += x;
+		}
+
+		void sub_val(double x) {
+			this->x -= x;
+			this->y -= x;
+			this->z -= x;
+		}
+
+		void mul_by_val(double x) {
+			this->x *= x;
+			this->y *= x;
+			this->z *= x;
+		}
+
+		void div_by_val(double x) {
+			this->x /= x;
+			this->y /= x;
+			this->z /= x;
+		}
+
 		void add_pos(Rect& other) {
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+		}
+
+		void add_vector(Vector& other) {
 			this->x += other.x;
 			this->y += other.y;
 			this->z += other.z;
@@ -91,13 +121,31 @@ namespace flow {
 			this->z -= other.z;
 		}
 
+		void sub_vector(Vector& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+		}
+
 		void mul_pos(Rect& other) {
 			this->x *= other.x;
 			this->y *= other.y;
 			this->z *= other.z;
 		}
 
+		void mul_by_vector(Vector& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+		}
+
 		void div_pos(Rect& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+		}
+
+		void div_by_vector(Vector& other) {
 			this->x /= other.x;
 			this->y /= other.y;
 			this->z /= other.z;
@@ -121,7 +169,7 @@ namespace flow {
 			this->l *= other.l;
 		}
 
-		void mul_size_by_scale(Vector& other) {
+		void mul_size_by_vector(Vector& other) {
 			this->w *= other.x;
 			this->h *= other.y;
 			this->l *= other.z;

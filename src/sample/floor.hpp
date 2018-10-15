@@ -13,7 +13,6 @@ namespace game {
 			this->collider.set_pos(flow::Point(200, 300, 50));
 			this->collider.set_size(flow::Size(500, 50, 550));
 			this->scale = flow::new_scale(0.6);
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {
@@ -23,7 +22,6 @@ namespace game {
 			std::cout<<"floor: "<<this->collider.y<<std::endl;
 		}
 		void event(SDL_Event event) {}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 
 	class Table : public flow::GameEntity {
@@ -35,7 +33,6 @@ namespace game {
 			this->collider.set_pos(flow::Point(200, 50, 0));
 			this->collider.set_size(flow::Size(500, 50, 550));
 			this->scale = flow::new_scale(0.5);
-			this->is_handling_collisions = false;
 		}
 
 		void update(double delta) {}
@@ -44,6 +41,5 @@ namespace game {
 				std::cout<<"T: y="<<this->collider.y<<", z="<<this->collider.z<<std::endl;
 			}
 		}
-		void collision(flow::EntityPtr body) {flow::log::info("collision");}
 	};
 }

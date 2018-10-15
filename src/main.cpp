@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
 		engine.add_entity( std::make_shared<game::Leg>(&engine, "l22", 250-80, 275-50) );
 		engine.add_entity( std::make_shared<game::FlyingLeg>(&engine, (250-80)/2, 550/4) );
 		engine.add_entity( std::make_shared<game::SpecialLeg>(&engine, 0-40, 275) );
+		engine.add_entity( std::make_shared<game::Player>(&engine) );
 		
 		engine.game_loop();
 

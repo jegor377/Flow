@@ -125,6 +125,18 @@ namespace flow {
 			return this->window_rect;
 		}
 
+		EntityList* find_collisions(Entity* body) {
+			EntityList* result = new EntityList();
+			for(auto other: this->entity_collector.entities) {
+				if(other.get() != body) {
+					if(body->is_scaled_colliding(other)) {
+						result->push_back(other);
+					}
+				}
+			}
+			return result;
+		}
+
 		void game_loop() {
 			while(this->is_running) {
 				// Pulling events from event stack.
@@ -175,19 +187,19 @@ namespace flow {
 
 		void update(const EntityPtr& entity, const double& delta_time) {
 			entity->update(delta_time);
-			if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
+			//if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
 		}
 
 
-		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
-			for(auto _entity: this->entity_collector.entities) {
-				if(_entity.get() != entity.get()) {
-					if(entity->collider.is_colliding(_entity->collider)) {
-						entity->collision(_entity);
+		/*void handle_collisions(const EntityPtr& entity, const double& delta_time) {
+			for(auto other: this->entity_collector.entities) {
+				if(other.get() != entity.get()) {
+					if(entity->is_scaled_colliding(other)) {
+						entity->collision(other, delta_time);
 					}
 				}
 			}
-		}
+		}*/
 
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;

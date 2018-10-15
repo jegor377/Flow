@@ -13,6 +13,5 @@ namespace flow {
 
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(EntityPtr body) = 0;
 	};
 }

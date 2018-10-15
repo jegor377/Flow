@@ -38,6 +38,54 @@ namespace flow {
 	class Vector : public Point {
 	public:
 		Vector(double x=0, double y=0, double z=0) : Point(x, y, z) {};
+
+		void add(Vector& other) {
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+		}
+
+		void sub(Vector& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+		}
+
+		void mul(Vector& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+		}
+
+		void div(Vector& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+		}
+
+		void add_val(double x) {
+			this->x += x;
+			this->y += x;
+			this->z += x;
+		}
+
+		void sub_val(double x) {
+			this->x -= x;
+			this->y -= x;
+			this->z -= x;
+		}
+
+		void mul_by_val(double x) {
+			this->x *= x;
+			this->y *= x;
+			this->z *= x;
+		}
+
+		void div_by_val(double x) {
+			this->x /= x;
+			this->y /= x;
+			this->z /= x;
+		}
 	};
 
 	Vector new_scale(double scale) {
@@ -146,7 +194,37 @@ namespace flow {
 	public:
 		Rect(double x=0, double y=0, double z=0, double w=0, double h=0, double l=0) : Point(x, y, z), Size(w, h, l) {};
 
+		void add_val(double x) {
+			this->x += x;
+			this->y += x;
+			this->z += x;
+		}
+
+		void sub_val(double x) {
+			this->x -= x;
+			this->y -= x;
+			this->z -= x;
+		}
+
+		void mul_by_val(double x) {
+			this->x *= x;
+			this->y *= x;
+			this->z *= x;
+		}
+
+		void div_by_val(double x) {
+			this->x /= x;
+			this->y /= x;
+			this->z /= x;
+		}
+
 		void add_pos(Rect& other) {
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+		}
+
+		void add_vector(Vector& other) {
 			this->x += other.x;
 			this->y += other.y;
 			this->z += other.z;
@@ -158,13 +236,31 @@ namespace flow {
 			this->z -= other.z;
 		}
 
+		void sub_vector(Vector& other) {
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+		}
+
 		void mul_pos(Rect& other) {
 			this->x *= other.x;
 			this->y *= other.y;
 			this->z *= other.z;
 		}
 
+		void mul_by_vector(Vector& other) {
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+		}
+
 		void div_pos(Rect& other) {
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+		}
+
+		void div_by_vector(Vector& other) {
 			this->x /= other.x;
 			this->y /= other.y;
 			this->z /= other.z;
@@ -188,7 +284,7 @@ namespace flow {
 			this->l *= other.l;
 		}
 
-		void mul_size_by_scale(Vector& other) {
+		void mul_size_by_vector(Vector& other) {
 			this->w *= other.x;
 			this->h *= other.y;
 			this->l *= other.z;
@@ -395,7 +491,6 @@ namespace flow {
 		bool is_handling_rendering;
 		bool is_handling_update;
 		bool is_handling_events;
-		bool is_handling_collisions;
 
 		Vector scale;
 	private:
@@ -404,7 +499,6 @@ namespace flow {
 			this->is_handling_rendering = true;
 			this->is_handling_update = true;
 			this->is_handling_events = true;
-			this->is_handling_collisions = true;
 		}
 
 	public:
@@ -421,7 +515,6 @@ namespace flow {
 		
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(std::shared_ptr<Entity> body) = 0;
 
 		const std::string get_name() {
 			return this->name;
@@ -439,20 +532,34 @@ namespace flow {
 			return this->group == group;
 		}
 
+		Rect get_scaled_collider() {
+			Rect result = this->collider;
+			result.mul_size_by_vector(this->scale);
+			return result;
+		}
+
+		bool is_scaled_colliding(std::shared_ptr<Entity> body) {
+			Rect other = body->get_scaled_collider();
+			return this->get_scaled_collider().is_colliding(other);
+		}
+
+		bool is_scaled_colliding(Entity* body) {
+			Rect other = body->get_scaled_collider();
+			return this->get_scaled_collider().is_colliding(other);
+		}
+
 		bool is_in_xy_collision(std::shared_ptr<Entity> body) {
-			Rect other_scaled_rect = body->collider;
-			other_scaled_rect.mul_size_by_scale(body->scale);
-			Rect this_scaled_rect = this->collider;
-			this_scaled_rect.mul_size_by_scale(this->scale);
-			return this_scaled_rect.is_in_xy_collision(other_scaled_rect);
+			Rect other = body->get_scaled_collider();
+			return this->get_scaled_collider().is_in_xy_collision(other);
 		}
 
 		bool is_in_xz_collision(std::shared_ptr<Entity> body) {
-			Rect other_scaled_rect = body->collider;
-			other_scaled_rect.mul_size_by_scale(body->scale);
-			Rect this_scaled_rect = this->collider;
-			this_scaled_rect.mul_size_by_scale(this->scale);
-			return this_scaled_rect.is_in_xz_collision(other_scaled_rect);
+			Rect other = body->get_scaled_collider();
+			return this->get_scaled_collider().is_in_xz_collision(other);
+		}
+
+		void move(Vector& movement) {
+			this->collider.add_vector(movement);
 		}
 	};
 
@@ -816,6 +923,18 @@ namespace flow {
 			return this->window_rect;
 		}
 
+		EntityList* find_collisions(Entity* body) {
+			EntityList* result = new EntityList();
+			for(auto other: this->entity_collector.entities) {
+				if(other.get() != body) {
+					if(body->is_scaled_colliding(other)) {
+						result->push_back(other);
+					}
+				}
+			}
+			return result;
+		}
+
 		void game_loop() {
 			while(this->is_running) {
 				// Pulling events from event stack.
@@ -866,19 +985,19 @@ namespace flow {
 
 		void update(const EntityPtr& entity, const double& delta_time) {
 			entity->update(delta_time);
-			if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
+			//if(entity->is_handling_collisions) handle_collisions(entity, delta_time);
 		}
 
 
-		void handle_collisions(const EntityPtr& entity, const double& delta_time) {
-			for(auto _entity: this->entity_collector.entities) {
-				if(_entity.get() != entity.get()) {
-					if(entity->collider.is_colliding(_entity->collider)) {
-						entity->collision(_entity);
+		/*void handle_collisions(const EntityPtr& entity, const double& delta_time) {
+			for(auto other: this->entity_collector.entities) {
+				if(other.get() != entity.get()) {
+					if(entity->is_scaled_colliding(other)) {
+						entity->collision(other, delta_time);
 					}
 				}
 			}
-		}
+		}*/
 
 		void render(const EntityPtr& entity) {
 			auto copy_texture = entity->shared_sprite.sprite->texture;
@@ -982,6 +1101,5 @@ namespace flow {
 
 		virtual void update(double delta) = 0;
 		virtual void event(SDL_Event event) = 0;
-		virtual void collision(EntityPtr body) = 0;
 	};
 }
