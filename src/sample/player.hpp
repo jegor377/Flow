@@ -9,6 +9,7 @@ namespace game {
 		flow::Vector gravity;
 		flow::Vector jump_vel;
 		const double BOUNCE = 0.5;
+		bool is_colliding_below = false;
 	public:
 		Player(flow::Flow* engine) : flow::GameEntity(engine) {
 			this->name = "p1";
@@ -18,12 +19,12 @@ namespace game {
 			this->collider.set_size(flow::Size(80, 100, 20));
 			this->scale = flow::new_scale(0.4);
 			this->gravity = flow::Vector(0, 10, 0);
-			this->jump_vel = flow::Vector(0, -200, 0);
+			this->jump_vel = flow::Vector(0, -300, 0);
 		}
 
 		void update(double delta) {
 			auto collision_bodies = this->engine->find_collisions(this);
-			bool is_colliding_below = false;
+			this->is_colliding_below = false;
 			for(auto body: *collision_bodies) {
 				if(body->is_in_group("ground")) {
 					is_colliding_below = true;
@@ -48,7 +49,9 @@ namespace game {
 				flow::log::info("Exit.");
 				this->engine->is_running = false;
 			} else if(event.type == SDL_MOUSEBUTTONDOWN) {
-				this->velocity.add(this->jump_vel);
+				if(is_colliding_below) {
+					this->velocity.add(this->jump_vel);
+				}
 			}
 		}
 	};
