@@ -10,3 +10,7 @@ After doing so, you can just use my recompile scripts in project directory. Reco
 
 ## Release date
 Someday I'll finish this project. Someday...
+
+## Used outside libraries
+* https://www.libsdl.org/ (SDL2)
+* https://github.com/martinmoene/lest (only lest_basic.hpp)

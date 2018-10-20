@@ -1,7 +1,10 @@
 namespace flow {
 	class Vector : public Point {
 	public:
-		Vector(double x=0, double y=0, double z=0) : Point(x, y, z) {};
+
+		Vector() : Point(0, 0, 0) {};
+		Vector(double val) : Point(val, val, val) {};
+		Vector(double x, double y, double z) : Point(x, y, z) {};
 
 		void add(Vector& other) {
 			this->x += other.x;
@@ -52,8 +55,8 @@ namespace flow {
 		}
 	};
 
+	// TODO: Change name to new_scale_of
 	Vector new_scale(double scale) {
-		Vector result(scale, scale, scale);
-		return result;
+		return Vector(scale);;
 	}
 }

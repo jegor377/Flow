@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 		flow::init();
 		atexit(flow::quit);
 
-		flow::Flow engine(false, true);
+		flow::Flow engine(false);
 
 		engine.create_window();
 		flow::log::info("Window created.");

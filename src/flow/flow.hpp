@@ -13,6 +13,8 @@
 #include <iostream>
 
 // Wrapper CPP imports:
+//interfaces
+@import str_representator;
 //physical metrics
 @import point;
 @import vector;

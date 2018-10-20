@@ -33,13 +33,11 @@ namespace game {
 			this->collider.set_pos(flow::Point(200, 50, 0));
 			this->collider.set_size(flow::Size(500, 50, 550));
 			this->scale = flow::new_scale(0.5);
+			this->scale.x = 1;
 		}
 
 		void update(double delta) {}
 		void event(SDL_Event event) {
-			if(event.type == SDL_MOUSEBUTTONDOWN) {
-				std::cout<<"T: y="<<this->collider.y<<", z="<<this->collider.z<<std::endl;
-			}
 		}
 	};
 }
