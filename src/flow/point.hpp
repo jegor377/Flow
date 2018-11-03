@@ -89,6 +89,30 @@ namespace flow {
 			this->x = this->x / val;
 			this->y = this->y / val;
 		}
+
+		bool is_equal(Point2& other) {
+			return (this->x == other.x) && (this->y == other.y);
+		}
+
+		bool is_equal(double val) {
+			return (this->x == val) && (this->y == val);
+		}
+
+		bool operator==(Point2& other) {
+			return this->is_equal(other);
+		}
+
+		bool operator!=(Point2& other) {
+			return !this->is_equal(other);
+		}
+
+		bool operator==(double val) {
+			return this->is_equal(val);
+		}
+
+		bool operator!=(double val) {
+			return !this->is_equal(val);
+		}
 	};
 
 	class Point : public Point2 {
@@ -180,6 +204,30 @@ namespace flow {
 			this->x = this->x / val;
 			this->y = this->y / val;
 			this->z = this->z / val;
+		}
+
+		bool is_equal(Point& other) {
+			return this->Point2::is_equal( *(Point2*)(&other) ) && this->z == other.z;
+		}
+
+		bool is_equal(double val) {
+			return this->Point2::is_equal( val ) && this->z == val;
+		}
+
+		bool operator==(Point& other) {
+			return this->is_equal(other);
+		}
+
+		bool operator!=(Point& other) {
+			return !this->is_equal(other);
+		}
+
+		bool operator==(double val) {
+			return this->is_equal(val);
+		}
+
+		bool operator!=(double val) {
+			return !this->is_equal(val);
 		}
 	};
 }

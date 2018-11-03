@@ -101,6 +101,36 @@ CASE("Size2 /= double operator works correctly"){
 	EXPECT(a.w == 5 && a.h == 15);
 },
 
+// equal operators
+CASE("Size2 == Size2 operator works correctly"){
+	flow::Size2 a(10, 20);
+	flow::Size2 b(10, 20);
+	flow::Size2 c(20, 10);
+	EXPECT(a == b);
+	EXPECT( !(a == c) );
+},
+CASE("Size2 == double operator works correctly"){
+	flow::Size2 a(20, 20);
+	double b = 20;
+	double c = 30;
+	EXPECT(a == b);
+	EXPECT( !(a == c) );
+},
+CASE("Size2 != Size2 operator works correctly"){
+	flow::Size2 a(10, 20);
+	flow::Size2 b(20, 10);
+	flow::Size2 c(10, 20);
+	EXPECT(a != b);
+	EXPECT( !(a != c) );
+},
+CASE("Size2 != double operator works correctly"){
+	flow::Size2 a(20, 20);
+	double b = 30;
+	double c = 20;
+	EXPECT(a != b);
+	EXPECT( !(a != c) );
+},
+
 // methods
 CASE("Size2 to_string method works returns correct results"){
 	flow::Size2 a(10, 30);

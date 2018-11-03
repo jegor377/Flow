@@ -10,5 +10,6 @@ namespace test_cases {
 		@import point;
 		@import size2;
 		@import size;
+		@import rect2;
 	};
 }

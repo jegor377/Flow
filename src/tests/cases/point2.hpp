@@ -101,6 +101,36 @@ CASE("Point2 /= double operator works correctly"){
 	EXPECT(a.x == 5 && a.y == 15);
 },
 
+// equal operators
+CASE("Point2 == Point2 operator works correctly"){
+	flow::Point2 a(10, 20);
+	flow::Point2 b(10, 20);
+	flow::Point2 c(20, 10);
+	EXPECT(a == b);
+	EXPECT( !(a == c) );
+},
+CASE("Point2 == double operator works correctly"){
+	flow::Point2 a(20, 20);
+	double b = 20;
+	double c = 30;
+	EXPECT(a == b);
+	EXPECT( !(a == c) );
+},
+CASE("Point2 != Point2 operator works correctly"){
+	flow::Point2 a(10, 20);
+	flow::Point2 b(20, 10);
+	flow::Point2 c(10, 20);
+	EXPECT(a != b);
+	EXPECT( !(a != c) );
+},
+CASE("Point2 != double operator works correctly"){
+	flow::Point2 a(20, 20);
+	double b = 30;
+	double c = 20;
+	EXPECT(a != b);
+	EXPECT( !(a != c) );
+},
+
 // methods
 CASE("Point2 to_string method works returns correct results"){
 	flow::Point2 a(10, 30);

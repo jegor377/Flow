@@ -83,6 +83,30 @@ namespace flow {
 			this->w = this->w / val;
 			this->h = this->h / val;
 		}
+
+		bool is_equal(Size2& other) {
+			return (this->w == other.w) && (this->h == other.h);
+		}
+
+		bool is_equal(double val) {
+			return (this->w == val) && (this->h == val);
+		}
+
+		bool operator==(Size2& other) {
+			return this->is_equal(other);
+		}
+
+		bool operator!=(Size2& other) {
+			return !this->is_equal(other);
+		}
+
+		bool operator==(double val) {
+			return this->is_equal(val);
+		}
+
+		bool operator!=(double val) {
+			return !this->is_equal(val);
+		}
 	};
 
 	class Size : public Size2 {
@@ -175,6 +199,30 @@ namespace flow {
 			this->w = this->w / val;
 			this->h = this->h / val;
 			this->l = this->l / val;
+		}
+
+		bool is_equal(Size& other) {
+			return this->Size2::is_equal( *(Size2*)(&other) ) && this->l == other.l;
+		}
+
+		bool is_equal(double val) {
+			return this->Size2::is_equal( val ) && this->l == val;
+		}
+
+		bool operator==(Size& other) {
+			return this->is_equal(other);
+		}
+
+		bool operator!=(Size& other) {
+			return !this->is_equal(other);
+		}
+
+		bool operator==(double val) {
+			return this->is_equal(val);
+		}
+
+		bool operator!=(double val) {
+			return !this->is_equal(val);
 		}
 	};
 }

@@ -13,8 +13,16 @@ namespace flow {
 			this->mode = mode;
 		};
 
+		Rect2(const Rect2& other) {
+			this->x = other.x;
+			this->y = other.y;
+			this->w = other.w;
+			this->h = other.h;
+			this->mode = other.mode;
+		}
+
 		std::string to_string() {
-			return "Rect2{x: "+std::to_string(this->x)+", y: "+std::to_string(this->y)+", w: "+std::to_string(this->w)+", h: "+std::to_string(this->h)+", "+(this->mode == SECTION ? "SECTION" : "FULL")+"}";
+			return "Rect2{x: "+std::to_string(this->x)+", y: "+std::to_string(this->y)+", w: "+std::to_string(this->w)+", h: "+std::to_string(this->h)+", mode: "+(this->mode == SECTION ? "SECTION" : "FULL")+"}";
 		}
 
 		SDL_Rect* get_sdl_rect() {
@@ -27,98 +35,7 @@ namespace flow {
 			}
 			return NULL;
 		}
-		//START
 
-		/*Rect2 operator+(Rect2& other) {
-			return Rect2(this->x + other.x, this->y + other.y, this->w + other.w, this->h + other.h, this->mode);
-		}
-
-		Rect2 operator-(Rect2& other) {
-			return Rect2(this->x - other.x, this->y - other.y, this->w - other.w, this->h - other.h, this->mode);
-		}
-
-		Rect2 operator*(Rect2& other) {
-			return Rect2(this->x * other.x, this->y * other.y, this->w * other.w, this->h *+ other.h, this->mode);
-		}
-
-		Rect2 operator/(Rect2& other) {
-			return Rect2(this->x / other.x, this->y / other.y, this->w / other.w, this->h / other.h, this->mode);
-		}
-
-		void operator+=(Rect2& other) {
-			this->x = this->x + other.x;
-			this->y = this->y + other.y;
-			this->w = this->w + other.w;
-			this->h = this->h + other.h;
-		}
-
-		void operator-=(Rect2& other) {
-			this->x = this->x - other.x;
-			this->y = this->y - other.y;
-			this->w = this->w - other.w;
-			this->h = this->h - other.h;
-		}
-
-		void operator*=(Rect2& other) {
-			this->x = this->x * other.x;
-			this->y = this->y * other.y;
-			this->w = this->w * other.w;
-			this->h = this->h * other.h;
-		}
-
-		void operator/=(Rect2& other) {
-			this->x = this->x / other.x;
-			this->y = this->y / other.y;
-			this->w = this->w / other.w;
-			this->h = this->h / other.h;
-		}
-
-		Rect2 operator+(double val) {
-			return Rect2(this->x + val, this->y + val, this->w + val, this->h + val, this->mode);
-		}
-
-		Rect2 operator-(double val) {
-			return Rect2(this->x - val, this->y - val, this->w - val, this->h - val, this->mode);
-		}
-
-		Rect2 operator*(double val) {
-			return Rect2(this->x * val, this->y * val, this->w * val, this->h * val, this->mode);
-		}
-
-		Rect2 operator/(double val) {
-			return Rect2(this->x / val, this->y / val, this->w / val, this->h / val, this->mode);
-		}
-
-		void operator+=(double val) {
-			this->x = this->x + val;
-			this->y = this->y + val;
-			this->w = this->w + val;
-			this->h = this->h + val;
-		}
-
-		void operator-=(double val) {
-			this->x = this->x - val;
-			this->y = this->y - val;
-			this->w = this->w - val;
-			this->h = this->h - val;
-		}
-
-		void operator*=(double val) {
-			this->x = this->x * val;
-			this->y = this->y * val;
-			this->w = this->w * val;
-			this->h = this->h * val;
-		}
-
-		void operator/=(double val) {
-			this->x = this->x / val;
-			this->y = this->y / val;
-			this->w = this->w / val;
-			this->h = this->h / val;
-		}*/
-		//END
-
-		//START2
 		Rect2 operator+(Rect2& other) {
 			return Rect2(this->x + other.x, this->y + other.y, this->w + other.w, this->h + other.h, this->mode);
 		}
@@ -141,24 +58,18 @@ namespace flow {
 		}
 
 		void operator-=(Rect2& other) {
-			this->x = this->x - other.x;
-			this->y = this->y - other.y;
-			this->w = this->w - other.w;
-			this->h = this->h - other.h;
+			this->Point2::operator-=( *(Point2*)(&other) );
+			this->Size2::operator-=( *(Size2*)(&other) );
 		}
 
 		void operator*=(Rect2& other) {
-			this->x = this->x * other.x;
-			this->y = this->y * other.y;
-			this->w = this->w * other.w;
-			this->h = this->h * other.h;
+			this->Point2::operator*=( *(Point2*)(&other) );
+			this->Size2::operator*=( *(Size2*)(&other) );
 		}
 
 		void operator/=(Rect2& other) {
-			this->x = this->x / other.x;
-			this->y = this->y / other.y;
-			this->w = this->w / other.w;
-			this->h = this->h / other.h;
+			this->Point2::operator/=( *(Point2*)(&other) );
+			this->Size2::operator/=( *(Size2*)(&other) );
 		}
 
 		Rect2 operator+(double val) {
@@ -178,33 +89,55 @@ namespace flow {
 		}
 
 		void operator+=(double val) {
-			this->x = this->x + val;
-			this->y = this->y + val;
-			this->w = this->w + val;
-			this->h = this->h + val;
+			this->Point2::operator+=( val );
+			this->Size2::operator+=( val );
 		}
 
 		void operator-=(double val) {
-			this->x = this->x - val;
-			this->y = this->y - val;
-			this->w = this->w - val;
-			this->h = this->h - val;
+			this->Point2::operator-=( val );
+			this->Size2::operator-=( val );
 		}
 
 		void operator*=(double val) {
-			this->x = this->x * val;
-			this->y = this->y * val;
-			this->w = this->w * val;
-			this->h = this->h * val;
+			this->Point2::operator*=( val );
+			this->Size2::operator*=( val );
 		}
 
 		void operator/=(double val) {
-			this->x = this->x / val;
-			this->y = this->y / val;
-			this->w = this->w / val;
-			this->h = this->h / val;
+			this->Point2::operator/=( val );
+			this->Size2::operator/=( val );
 		}
-		//END2
+
+		// Returns true if all position and size values are equal. Doesn't take mode into account.
+		bool is_vequal(Rect2& other) {
+			return this->Point2::is_equal( *(Point2*)(&other) ) && this->Size2::is_equal( *(Size2*)(&other) );
+		}
+
+		// Returns true if all position, size and mode values are equal. Takes mode into account.
+		bool is_equal(Rect2& other) {
+			return this->is_vequal(other) && this->mode == other.mode;
+		}
+
+		// Returns true if all position, size are equal to value.
+		bool is_equal(double val) {
+			return this->Point2::is_equal( val ) && this->Size2::is_equal( val );
+		}
+
+		bool operator==(Rect2& other) {
+			return this->is_equal(other);
+		}
+
+		bool operator!=(Rect2& other) {
+			return !this->is_equal(other);
+		}
+
+		bool operator==(double val) {
+			return this->is_equal(val);
+		}
+
+		bool operator!=(double val) {
+			return !this->is_equal(val);
+		}
 
 		void set_pos(const Point2& new_pos) {
 			this->x = new_pos.x;
@@ -214,6 +147,46 @@ namespace flow {
 		void set_size(const Size2& new_size) {
 			this->w = new_size.w;
 			this->h = new_size.h;
+		}
+
+		void operator+=(const Point2& pos) {
+			this->x += pos.x;
+			this->y += pos.y;
+		}
+
+		void operator-=(const Point2& pos) {
+			this->x -= pos.x;
+			this->y -= pos.y;
+		}
+
+		void operator*=(const Point2& pos) {
+			this->x *= pos.x;
+			this->y *= pos.y;
+		}
+
+		void operator/=(const Point2& pos) {
+			this->x /= pos.x;
+			this->y /= pos.y;
+		}
+
+		void operator+=(const Size2& size) {
+			this->w += size.w;
+			this->h += size.h;
+		}
+
+		void operator-=(const Size2& size) {
+			this->w -= size.w;
+			this->h -= size.h;
+		}
+
+		void operator*=(const Size2& size) {
+			this->w *= size.w;
+			this->h *= size.h;
+		}
+
+		void operator/=(const Size2& size) {
+			this->w /= size.w;
+			this->h /= size.h;
 		}
 
 		void add_pos(Point2& other) {
