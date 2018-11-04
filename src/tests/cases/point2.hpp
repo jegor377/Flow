@@ -30,6 +30,12 @@ CASE("Point2 + double operator works correctly"){
 	flow::Point2 b = a + val;
 	EXPECT(b.x == 5 && b.y == 8);
 },
+CASE("double + Point2 operator works correctly"){
+	flow::Point2 a(2, 5);
+	double val = 3;
+	flow::Point2 b = val + a;
+	EXPECT(b.x == 5 && b.y == 8);
+},
 CASE("Point2 - double operator works correctly"){
 	flow::Point2 a(4, 5);
 	double val = 3;
@@ -40,6 +46,12 @@ CASE("Point2 * double operator works correctly"){
 	flow::Point2 a(2, 5);
 	double val = 3;
 	flow::Point2 b = a * val;
+	EXPECT(b.x == 6 && b.y == 15);
+},
+CASE("double * Point2 operator works correctly"){
+	flow::Point2 a(2, 5);
+	double val = 3;
+	flow::Point2 b = val * a;
 	EXPECT(b.x == 6 && b.y == 15);
 },
 CASE("Point2 / double operator works correctly"){

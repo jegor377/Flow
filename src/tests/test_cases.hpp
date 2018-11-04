@@ -38,6 +38,12 @@ CASE("Point2 + double operator works correctly"){
 	flow::Point2 b = a + val;
 	EXPECT(b.x == 5 && b.y == 8);
 },
+CASE("double + Point2 operator works correctly"){
+	flow::Point2 a(2, 5);
+	double val = 3;
+	flow::Point2 b = val + a;
+	EXPECT(b.x == 5 && b.y == 8);
+},
 CASE("Point2 - double operator works correctly"){
 	flow::Point2 a(4, 5);
 	double val = 3;
@@ -48,6 +54,12 @@ CASE("Point2 * double operator works correctly"){
 	flow::Point2 a(2, 5);
 	double val = 3;
 	flow::Point2 b = a * val;
+	EXPECT(b.x == 6 && b.y == 15);
+},
+CASE("double * Point2 operator works correctly"){
+	flow::Point2 a(2, 5);
+	double val = 3;
+	flow::Point2 b = val * a;
 	EXPECT(b.x == 6 && b.y == 15);
 },
 CASE("Point2 / double operator works correctly"){
@@ -176,6 +188,12 @@ CASE("Point + double operator works correctly"){
 	flow::Point b = a + val;
 	EXPECT(b.x == 5 && b.y == 8 && b.z == 6);
 },
+CASE("double + Point operator works correctly"){
+	flow::Point a(2, 5, 3);
+	double val = 3;
+	flow::Point b = val + a;
+	EXPECT(b.x == 5 && b.y == 8 && b.z == 6);
+},
 CASE("Point - double operator works correctly"){
 	flow::Point a(4, 5, 3);
 	double val = 3;
@@ -186,6 +204,12 @@ CASE("Point * double operator works correctly"){
 	flow::Point a(2, 5, 3);
 	double val = 3;
 	flow::Point b = a * val;
+	EXPECT(b.x == 6 && b.y == 15 && b.z == 9);
+},
+CASE("double * Point operator works correctly"){
+	flow::Point a(2, 5, 3);
+	double val = 3;
+	flow::Point b = val * a;
 	EXPECT(b.x == 6 && b.y == 15 && b.z == 9);
 },
 CASE("Point / double operator works correctly"){
@@ -314,6 +338,12 @@ CASE("Size2 + double operator works correctly"){
 	flow::Size2 b = a + val;
 	EXPECT(b.w == 5 && b.h == 8);
 },
+CASE("double + Size2 operator works correctly"){
+	flow::Size2 a(2, 5);
+	double val = 3;
+	flow::Size2 b = val + a;
+	EXPECT(b.w == 5 && b.h == 8);
+},
 CASE("Size2 - double operator works correctly"){
 	flow::Size2 a(4, 5);
 	double val = 3;
@@ -324,6 +354,12 @@ CASE("Size2 * double operator works correctly"){
 	flow::Size2 a(2, 5);
 	double val = 3;
 	flow::Size2 b = a * val;
+	EXPECT(b.w == 6 && b.h == 15);
+},
+CASE("double * Size2 operator works correctly"){
+	flow::Size2 a(2, 5);
+	double val = 3;
+	flow::Size2 b = val * a;
 	EXPECT(b.w == 6 && b.h == 15);
 },
 CASE("Size2 / double operator works correctly"){
@@ -452,6 +488,12 @@ CASE("Size + double operator works correctly"){
 	flow::Size b = a + val;
 	EXPECT(b.w == 5 && b.h == 8 && b.l == 6);
 },
+CASE("double + Size operator works correctly"){
+	flow::Size a(2, 5, 3);
+	double val = 3;
+	flow::Size b = val + a;
+	EXPECT(b.w == 5 && b.h == 8 && b.l == 6);
+},
 CASE("Size - double operator works correctly"){
 	flow::Size a(4, 5, 3);
 	double val = 3;
@@ -462,6 +504,12 @@ CASE("Size * double operator works correctly"){
 	flow::Size a(2, 5, 3);
 	double val = 3;
 	flow::Size b = a * val;
+	EXPECT(b.w == 6 && b.h == 15 && b.l == 9);
+},
+CASE("double * Size operator works correctly"){
+	flow::Size a(2, 5, 3);
+	double val = 3;
+	flow::Size b = val * a;
 	EXPECT(b.w == 6 && b.h == 15 && b.l == 9);
 },
 CASE("Size / double operator works correctly"){
@@ -590,6 +638,12 @@ CASE("Rect2 + double operator works correctly"){
 	flow::Rect2 b = a + val;
 	EXPECT(b.x == 5 && b.y == 8 && b.w == 10 && b.h == 3 && b.mode == a.mode);
 },
+CASE("double + Rect2 operator works correctly"){
+	flow::Rect2 a(2, 5, 7, 0, flow::SECTION);
+	double val = 3;
+	flow::Rect2 b = val + a;
+	EXPECT(b.x == 5 && b.y == 8 && b.w == 10 && b.h == 3 && b.mode == a.mode);
+},
 CASE("Rect2 - double operator works correctly"){
 	flow::Rect2 a(4, 5, 3, 1, flow::SECTION);
 	double val = 3;
@@ -600,6 +654,12 @@ CASE("Rect2 * double operator works correctly"){
 	flow::Rect2 a(2, 5, 3, 10, flow::SECTION);
 	double val = 3;
 	flow::Rect2 b = a * val;
+	EXPECT(b.x == 6 && b.y == 15 && b.w == 9 && b.h == 30 && b.mode == a.mode);
+},
+CASE("double * Rect2 operator works correctly"){
+	flow::Rect2 a(2, 5, 3, 10, flow::SECTION);
+	double val = 3;
+	flow::Rect2 b = val * a;
 	EXPECT(b.x == 6 && b.y == 15 && b.w == 9 && b.h == 30 && b.mode == a.mode);
 },
 CASE("Rect2 / double operator works correctly"){

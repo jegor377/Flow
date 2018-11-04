@@ -36,8 +36,8 @@ namespace game {
 
 		void apply_friction(double friction=0.1) {
 			flow::Vector friction_v = this->velocity;
-			friction_v.mul_by_val(friction*(-1));
-			this->velocity.add(friction_v);
+			friction_v *= friction*(-1);
+			this->velocity += friction_v;
 		}
 
 		void update(double delta) {
@@ -56,17 +56,17 @@ namespace game {
 			}
 			delete collision_bodies;
 			if(!is_colliding_below) {
-				this->velocity.add(gravity);
+				this->velocity += gravity;
 			} else {
 				this->apply_friction();
 			}
 			//if(this->velocity.y <= 7 && this->velocity.y >= -7) this->velocity.y = 0;
-			if(is_going_straight) this->velocity.add(go_straight);
-			if(is_going_backwards) this->velocity.add(go_backwards);
-			if(is_going_left) this->velocity.add(go_left);
-			if(is_going_right)this->velocity.add(go_right);
+			if(is_going_straight) this->velocity += go_straight;
+			if(is_going_backwards) this->velocity += go_backwards;
+			if(is_going_left) this->velocity += go_left;
+			if(is_going_right)this->velocity += go_right;
 			flow::Vector frame_vel = this->velocity;
-			frame_vel.mul_by_val(delta);
+			frame_vel *= delta;
 			this->move(frame_vel);
 		}
 		void event(SDL_Event event) {
@@ -78,7 +78,7 @@ namespace game {
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if(is_colliding_below) {
-					this->velocity.add(this->jump_vel);
+					this->velocity += this->jump_vel;
 				}
 				break;
 			case SDL_KEYDOWN:

@@ -109,6 +109,14 @@ namespace flow {
 		}
 	};
 
+	Size2 operator+(double val, Size2& src) {
+		return src+val;
+	}
+
+	Size2 operator*(double val, Size2& src) {
+		return src*val;
+	}
+
 	class Size : public Size2 {
 	public:
 		double l; // length
@@ -225,4 +233,12 @@ namespace flow {
 			return !this->is_equal(val);
 		}
 	};
+
+	Size operator+(double val, Size& src) {
+		return src+val;
+	}
+
+	Size operator*(double val, Size& src) {
+		return src*val;
+	}
 }

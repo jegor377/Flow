@@ -30,6 +30,12 @@ CASE("Rect2 + double operator works correctly"){
 	flow::Rect2 b = a + val;
 	EXPECT(b.x == 5 && b.y == 8 && b.w == 10 && b.h == 3 && b.mode == a.mode);
 },
+CASE("double + Rect2 operator works correctly"){
+	flow::Rect2 a(2, 5, 7, 0, flow::SECTION);
+	double val = 3;
+	flow::Rect2 b = val + a;
+	EXPECT(b.x == 5 && b.y == 8 && b.w == 10 && b.h == 3 && b.mode == a.mode);
+},
 CASE("Rect2 - double operator works correctly"){
 	flow::Rect2 a(4, 5, 3, 1, flow::SECTION);
 	double val = 3;
@@ -40,6 +46,12 @@ CASE("Rect2 * double operator works correctly"){
 	flow::Rect2 a(2, 5, 3, 10, flow::SECTION);
 	double val = 3;
 	flow::Rect2 b = a * val;
+	EXPECT(b.x == 6 && b.y == 15 && b.w == 9 && b.h == 30 && b.mode == a.mode);
+},
+CASE("double * Rect2 operator works correctly"){
+	flow::Rect2 a(2, 5, 3, 10, flow::SECTION);
+	double val = 3;
+	flow::Rect2 b = val * a;
 	EXPECT(b.x == 6 && b.y == 15 && b.w == 9 && b.h == 30 && b.mode == a.mode);
 },
 CASE("Rect2 / double operator works correctly"){

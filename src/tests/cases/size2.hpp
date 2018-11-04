@@ -30,6 +30,12 @@ CASE("Size2 + double operator works correctly"){
 	flow::Size2 b = a + val;
 	EXPECT(b.w == 5 && b.h == 8);
 },
+CASE("double + Size2 operator works correctly"){
+	flow::Size2 a(2, 5);
+	double val = 3;
+	flow::Size2 b = val + a;
+	EXPECT(b.w == 5 && b.h == 8);
+},
 CASE("Size2 - double operator works correctly"){
 	flow::Size2 a(4, 5);
 	double val = 3;
@@ -40,6 +46,12 @@ CASE("Size2 * double operator works correctly"){
 	flow::Size2 a(2, 5);
 	double val = 3;
 	flow::Size2 b = a * val;
+	EXPECT(b.w == 6 && b.h == 15);
+},
+CASE("double * Size2 operator works correctly"){
+	flow::Size2 a(2, 5);
+	double val = 3;
+	flow::Size2 b = val * a;
 	EXPECT(b.w == 6 && b.h == 15);
 },
 CASE("Size2 / double operator works correctly"){

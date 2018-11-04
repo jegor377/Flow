@@ -115,6 +115,14 @@ namespace flow {
 		}
 	};
 
+	Point2 operator+(double val, Point2& src) {
+		return src+val;
+	}
+
+	Point2 operator*(double val, Point2& src) {
+		return src*val;
+	}
+
 	class Point : public Point2 {
 	public:
 		double z=0;
@@ -230,4 +238,12 @@ namespace flow {
 			return !this->is_equal(val);
 		}
 	};
+
+	Point operator+(double val, Point& src) {
+		return src+val;
+	}
+
+	Point operator*(double val, Point& src) {
+		return src*val;
+	}
 }
