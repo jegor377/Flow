@@ -573,6 +573,7 @@ enum RectMode {
 	FULL = 1
 };
 
+// TODO: Add division by 0 exception.
 class Rect2 : public Point2, public Size2 {
 	SDL_Rect sdl_representation;
 public:
@@ -819,27 +820,27 @@ public:
 	}
 
 	Rect operator/(Rect& other) {
-		return Rect(this->x / other.x, this->y / other.y, this->z / other.z, this->w / other.w, this->h / other.h, this->l - other.l);
+		return Rect(this->x / other.x, this->y / other.y, this->z / other.z, this->w / other.w, this->h / other.h, this->l / other.l);
 	}
 
 	void operator+=(Rect& other) {
-		this->Point2::operator+=( *(Point*)(&other) );
-		this->Size2::operator+=( *(Size*)(&other) );
+		this->Point::operator+=( *(Point*)(&other) );
+		this->Size::operator+=( *(Size*)(&other) );
 	}
 
 	void operator-=(Rect& other) {
-		this->Point2::operator-=( *(Point*)(&other) );
-		this->Size2::operator-=( *(Size*)(&other) );
+		this->Point::operator-=( *(Point*)(&other) );
+		this->Size::operator-=( *(Size*)(&other) );
 	}
 
 	void operator*=(Rect& other) {
-		this->Point2::operator*=( *(Point*)(&other) );
-		this->Size2::operator*=( *(Size*)(&other) );
+		this->Point::operator*=( *(Point*)(&other) );
+		this->Size::operator*=( *(Size*)(&other) );
 	}
 
 	void operator/=(Rect& other) {
-		this->Point2::operator/=( *(Point*)(&other) );
-		this->Size2::operator/=( *(Size*)(&other) );
+		this->Point::operator/=( *(Point*)(&other) );
+		this->Size::operator/=( *(Size*)(&other) );
 	}
 
 	Rect operator+(double val) {
@@ -851,11 +852,11 @@ public:
 	}
 
 	Rect operator*(double val) {
-		return Rect(this->x * val, this->y * val, this->z * val, this->w * val, this->h * val, this->z * val);
+		return Rect(this->x * val, this->y * val, this->z * val, this->w * val, this->h * val, this->l * val);
 	}
 
 	Rect operator/(double val) {
-		return Rect(this->x / val, this->y / val, this->z / val, this->w / val, this->h / val, this->z / val);
+		return Rect(this->x / val, this->y / val, this->z / val, this->w / val, this->h / val, this->l / val);
 	}
 
 	void operator+=(double val) {
@@ -1078,6 +1079,13 @@ public:
 		return this->x < other.x + other.w && this->x + this->w > other.x && this->z < other.z + other.l && this->z + this->l > other.z;
 	}
 };
+
+Rect operator+(double val, Rect& src) {
+	return src+val;
+}
+Rect operator*(double val, Rect& src) {
+	return src*val;
+}
 //sprite exceptions
 namespace exception {
 	class SpriteAssign: public std::exception {

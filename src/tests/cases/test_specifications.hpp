@@ -3,6 +3,7 @@
 #include <string>
 #include "lest_basic.hpp"
 #include "flow.hpp"
+#include <iostream>
 
 namespace test_cases {
 	const lest::test tests[] = {
@@ -11,5 +12,6 @@ namespace test_cases {
 		@import size2;
 		@import size;
 		@import rect2;
+		@import rect;
 	};
 }
