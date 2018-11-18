@@ -3,11 +3,12 @@
 #include <string>
 #include "lest_basic.hpp"
 #include "flow.hpp"
+#include "test_entity.hpp"
 #include <iostream>
 
 namespace test_cases {
-	const lest::test tests[] = {
-		// Non-assign operators
+const lest::test tests[] = {
+// Non-assign operators
 // Point2 and Point2 operators
 CASE("Point2 + Point2 operator works correctly"){
 	flow::Point2 a(2, 5);
@@ -157,7 +158,7 @@ CASE("Point2 to_string method works returns correct results"){
 	flow::Point2 a(10, 30);
 	EXPECT(a.to_string() == ("Point2{x: "+std::to_string(10.0)+", y: "+std::to_string(30.0)+"}") );
 },
-		// Non-assign operators
+// Non-assign operators
 // Point and Point operators
 CASE("Point + Point operator works correctly"){
 	flow::Point a(2, 5, 3);
@@ -307,7 +308,7 @@ CASE("Point to_string method works returns correct results"){
 	flow::Point a(10, 30, 2);
 	EXPECT(a.to_string() == ("Point{x: "+std::to_string(10.0)+", y: "+std::to_string(30.0)+", z: "+std::to_string(2.0)+"}") );
 },
-		// Non-assign operators
+// Non-assign operators
 // Size2 and Size2 operators
 CASE("Size2 + Size2 operator works correctly"){
 	flow::Size2 a(2, 5);
@@ -457,7 +458,7 @@ CASE("Size2 to_string method works returns correct results"){
 	flow::Size2 a(10, 30);
 	EXPECT(a.to_string() == ("Size2{w: "+std::to_string(10.0)+", h: "+std::to_string(30.0)+"}") );
 },
-		// Non-assign operators
+// Non-assign operators
 // Size and Size operators
 CASE("Size + Size operator works correctly"){
 	flow::Size a(2, 5, 3);
@@ -607,7 +608,7 @@ CASE("Size to_string method works returns correct results"){
 	flow::Size a(10, 30, 2);
 	EXPECT(a.to_string() == ("Size{w: "+std::to_string(10.0)+", h: "+std::to_string(30.0)+", l: "+std::to_string(2.0)+"}") );
 },
-		// Non-assign operators
+// Non-assign operators
 // Rect2 and Rect2 operators
 CASE("Rect2 + Rect2 operator works correctly"){
 	flow::Rect2 a(2, 5, 3, 4, flow::SECTION);
@@ -821,7 +822,7 @@ CASE("Rect2 to_string method works returns correct results"){
 	flow::Rect2 a(10, 30, 40, 50, flow::SECTION);
 	EXPECT(a.to_string() == ("Rect2{x: "+std::to_string(10.0)+", y: "+std::to_string(30.0)+", w: "+std::to_string(40.0)+", h: "+std::to_string(50.0)+", mode: SECTION}") );
 },
-		// Non-assign operators
+// Non-assign operators
 // Rect and Rect operators
 CASE("Rect + Rect operator works correctly"){
 	flow::Rect a(2, 5, 1, 3, 4, 6);
@@ -1021,5 +1022,44 @@ CASE("Rect to_string method works returns correct results"){
 	flow::Rect a(10, 20, 30, 40, 50, 60);
 	EXPECT(a.to_string() == ("Rect{x: "+std::to_string(10.0)+", y: "+std::to_string(20.0)+", z: "+std::to_string(30.0)+", w: "+std::to_string(40.0)+", h: "+std::to_string(50.0)+", l: "+std::to_string(60.0)+"}") );
 },
-	};
+CASE("EntityCollector add, get_by_name and size works correctly."){
+	flow::EntityCollector entity_collector;
+	entity_collector.add( std::make_shared<TestEntity>("test1") );
+	entity_collector.add( std::make_shared<TestEntity>("test2") );
+
+	try{
+		EXPECT( (entity_collector.get_by_name("test1")->get_name() == "test1") );
+		EXPECT( (entity_collector.get_by_name("test2")->get_name() == "test2") );
+		EXPECT(entity_collector.size() == 2);
+	} catch(flow::exception::EntityFindByName& e) {
+		EXPECT(false);
+	}
+	
+	EXPECT_THROWS( (entity_collector.get_by_name("test3")->get_name() == "test3") );
+},
+CASE("EntityCollector add, get_by_group and size works correctly."){
+	flow::EntityCollector entity_collector;
+	entity_collector.add( std::make_shared<TestEntity>("test1", "g1") );
+	entity_collector.add( std::make_shared<TestEntity>("test2", "g2") );
+	entity_collector.add( std::make_shared<TestEntity>("test3", "g1") );
+	entity_collector.add( std::make_shared<TestEntity>("test4", "g2") );
+	entity_collector.add( std::make_shared<TestEntity>("test5", "g1") );
+	try{
+		flow::EntityMap entities = entity_collector.get_by_group("g2");
+		EXPECT(entities.size() == 2);
+		for(flow::EntityPair& pair: entities) {
+			EXPECT( ((pair.entity->get_name() == "test2") || (pair.entity->get_name() == "test4")) );
+		}
+
+		flow::EntityMap entities2 = entity_collector.get_by_group("g1");
+		EXPECT(entities2.size() == 3);
+		for(flow::EntityPair& pair: entities2) {
+			EXPECT( ((pair.entity->get_name() == "test1") || (pair.entity->get_name() == "test3") || (pair.entity->get_name() == "test5")) );
+		}
+	} catch(flow::exception::EntityFindByGroup& e) {
+		EXPECT(false);
+	}
+	EXPECT_THROWS( (entity_collector.get_by_group("g3").size() > 0) );
+},
+};
 }

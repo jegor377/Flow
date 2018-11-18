@@ -1413,6 +1413,14 @@ public:
 	}
 
 	/**
+	 *  \brief Returns size of entities list.
+	 *
+	 */
+	unsigned int size() {
+		return this->entities.size();
+	}
+
+	/**
 	 *  \brief Removes the first entity that possesses specified name.
 	 *
 	 *  \param name Entity's name.
@@ -1454,6 +1462,20 @@ public:
 		return find_by_group(group);
 	}
 
+	// TODO: change name
+	EntityList sort() {
+		EntityList result = this->entities;
+		std::sort(result.begin(), result.end(), [](EntityPtr& e1, EntityPtr& e2){
+			const double e1_y_point = (e1->collider.y+e1->collider.h*e1->scale.y/2);
+			const double e2_y_point = (e2->collider.y+e2->collider.h*e2->scale.y/2);
+			if(e1->is_in_xy_collision(e2)) {
+				return e1->collider.z <= e2->collider.z;
+			}
+			return e1_y_point > e2_y_point;
+		});
+		return result;
+	}
+
 private:
 	/**
 	 *  \brief Finds the first entity that possesses specified name.
@@ -1486,19 +1508,6 @@ private:
 			}
 		}
 		if(result.size()==0) throw exception::EntityFindByGroup(group);
-		return result;
-	}
-
-	EntityList sort() {
-		EntityList result = this->entities;
-		std::sort(result.begin(), result.end(), [](EntityPtr& e1, EntityPtr& e2){
-			const double e1_y_point = (e1->collider.y+e1->collider.h*e1->scale.y/2);
-			const double e2_y_point = (e2->collider.y+e2->collider.h*e2->scale.y/2);
-			if(e1->is_in_xy_collision(e2)) {
-				return e1->collider.z <= e2->collider.z;
-			}
-			return e1_y_point > e2_y_point;
-		});
 		return result;
 	}
 };
