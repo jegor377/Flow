@@ -35,7 +35,7 @@ else
 		cp flow.hpp "src/tests"
 		mv flow.hpp src
 		wcpp ./src/tests/cases test_specifications >/dev/null
-		mv test_specifications.hpp src/tests/test_cases.hpp
+		mv cases.hpp src/tests/test_cases.hpp
 		g++ -c $test_compiler -std=c++11
 		if [ $? -eq 0 ]; then
 			create_bin_dir

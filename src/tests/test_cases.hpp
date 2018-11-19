@@ -1127,6 +1127,21 @@ CASE("EntityCollector add, get_by_group, size and remove_by_group works correctl
 
 	EXPECT_NO_THROW( entity_collector.remove_by_group("g1") );
 	EXPECT_THROWS( (entity_collector.get_by_group("g1").size() > 0) );
+	EXPECT_THROWS( entity_collector.remove_by_group("g1") );
+
+	try {
+		//expecting some simple questions to be answered as true.
+		flow::EntityMap entities = entity_collector.get_by_group("g2");
+		EXPECT(entities.size() == 2);
+		int how_much_found = 0;
+		for(flow::EntityPair& pair: entities) {
+			if(pair.entity->get_name() == "test2") how_much_found++;
+			if(pair.entity->get_name() == "test4") how_much_found++;
+		}
+		EXPECT( (how_much_found == entities.size()) );
+	} catch(flow::exception::EntityFindByGroup& e) {
+		EXPECT(false);
+	}
 
 	EXPECT_THROWS( (entity_collector.get_by_group("g3").size() > 0) );
 },

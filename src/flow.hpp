@@ -1435,16 +1435,9 @@ public:
 	 *  \param group Entities' group name.
 	 */
 	void remove_by_group(const std::string& group) {
-		bool found_at_least_one = false;
-		try{
-			while(true) {
-				auto found_entity = this->find_first_by_group(group);
-				found_at_least_one = true;
-				this->entities.erase(this->entities.begin()+found_entity.id);
-			}
-		} catch(exception::EntityFindByGroup& e) {
-			if(!found_at_least_one) throw e;
-			return;
+		auto found_entities = this->find_by_group(group);
+		for(int i = found_entities.size()-1; i >= 0; i--) {
+			this->entities.erase(this->entities.begin()+found_entities[i].id);
 		}
 	}
 
@@ -1516,21 +1509,6 @@ private:
 		}
 		if(result.size()==0) throw exception::EntityFindByGroup(group);
 		return result;
-	}
-
-	/**
-	 *  \brief Finds first entity that belongs to the specified group.
-	 *
-	 *  \param group Entities' group name.
-	 *  \return Pair of entity's pointer and it's poisition in Entity Collector.
-	 */
-	EntityPair find_first_by_group(const std::string& group) {
-		for(int entity_id = 0; entity_id < this->entities.size(); entity_id++) {
-			if(this->entities[entity_id]->is_in_group(group)) {
-				return EntityPair{entity_id, this->entities[entity_id]};
-			}
-		}
-		throw exception::EntityFindByGroup(group);
 	}
 };
 typedef std::vector<SpritePtr> SpriteList;
