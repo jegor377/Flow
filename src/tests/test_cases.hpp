@@ -1090,6 +1090,8 @@ CASE("EntityCollector add, get_by_name, size and remove_by_name works correctly.
 	}
 	
 	EXPECT_NO_THROW( entity_collector.remove_by_name("test3") );
+	EXPECT_THROWS( entity_collector.remove_by_name("test3") );
+	EXPECT(entity_collector.size() == 2);
 
 	EXPECT_THROWS( (entity_collector.get_by_name("test3")->get_name() == "test3") ); // expect it to throw because test3 doesn't exist.
 },
