@@ -16,7 +16,7 @@ if [ -z "$1" ]; then
 	wcpp $lib_src flow >/dev/null
 	cp flow.hpp "src/sample game"
 	mv flow.hpp src
-	g++ -c $compiler -std=c++11
+	g++ -c "$compiler" -std=c++11
 	if [ $? -eq 0 ]; then
 		create_bin_dir
 		g++ -o ./$bin $linker -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
@@ -27,7 +27,7 @@ else
 	elif [ "$1" = "-cx" ]; then
 		rm $linker $bin
 	elif [ "$1" = "-t" ]; then
-		test_bin='bin\tests'
+		test_bin='bin/tests'
 		test_compiler='./src/tests/t_main.cpp'
 		test_linker='./t_main.o'
 

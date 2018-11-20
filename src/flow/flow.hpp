@@ -146,7 +146,7 @@ public:
 			auto events = this->get_events();
 
 			// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
-			auto entities_copy = this->entity_collector.sort();
+			auto entities_copy = this->entity_collector.get_sorted_for_display();
 
 			// Calculate game delta time.
 			auto update_time_now = SDL_GetPerformanceCounter();

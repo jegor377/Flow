@@ -1462,9 +1462,8 @@ public:
 		return find_by_group(group);
 	}
 
-	// TODO: change name
-	EntityList sort() {
-		EntityList result = this->entities;
+	EntityList get_sorted_for_display() {
+		EntityList result = this->entities; // DON'T CHANGE THIS. IT HAS TO BE PASSED WITH RESULT.
 		std::sort(result.begin(), result.end(), [](EntityPtr& e1, EntityPtr& e2){
 			const double e1_y_point = (e1->collider.y+e1->collider.h*e1->scale.y/2);
 			const double e2_y_point = (e2->collider.y+e2->collider.h*e2->scale.y/2);
@@ -1473,6 +1472,8 @@ public:
 			}
 			return e1_y_point > e2_y_point;
 		});
+		// It's sorting entities based on theirs z and y. If an entity is farther from the player it's displayed first.
+		//Otherwise it displays what is under something first.
 		return result;
 	}
 
@@ -1670,7 +1671,7 @@ public:
 			auto events = this->get_events();
 
 			// Sorting entities in order to easly render them later. It must be done because algorithm needs to know witch entity goes first and witch to cover.
-			auto entities_copy = this->entity_collector.sort();
+			auto entities_copy = this->entity_collector.get_sorted_for_display();
 
 			// Calculate game delta time.
 			auto update_time_now = SDL_GetPerformanceCounter();
