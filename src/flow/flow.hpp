@@ -21,6 +21,7 @@ namespace flow {
 @import vector;
 @import size;
 @import rect;
+@import ray;
 //sprite exceptions
 @import spriteassign_err;
 @import spritefind_err;
@@ -130,7 +131,7 @@ public:
 
 	EntityList* find_collisions(Entity* body) {
 		EntityList* result = new EntityList();
-		for(auto other: this->entity_collector.entities) {
+		for(auto other: this->entity_collector.get_list()) {
 			if(other.get() != body) {
 				if(body->is_scaled_colliding(other)) {
 					result->push_back(other);

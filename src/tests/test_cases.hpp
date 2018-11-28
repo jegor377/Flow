@@ -4,6 +4,9 @@
 #include "lest_basic.hpp"
 #include "flow.hpp"
 #include "test_entity.hpp"
+
+#include "cases/ray.hpp"
+
 #include <iostream>
 
 namespace test_cases {
@@ -1147,5 +1150,8 @@ CASE("EntityCollector add, get_by_group, size and remove_by_group works correctl
 
 	EXPECT_THROWS( (entity_collector.get_by_group("g3").size() > 0) );
 },
+lest::test{"Ray constructor, set_direction and get_direction works correctly.", proper_direction_test},
+lest::test{"Point on ray collision detection test.", proper_point_collision_detection_test},
+lest::test{"TESTOWY", [](){EXPECT(true);}}, //TODO: weź to kurwa popraw xD
 };
 }

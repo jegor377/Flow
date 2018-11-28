@@ -10,7 +10,7 @@ class EntityCollector {
 	EntityList entities;
 public:
 
-	friend class Flow;
+	//friend class Flow; Remove it in next commit if it doesn't displays errors when compiling.
 
 	~EntityCollector() {
 		entities.clear();
@@ -23,6 +23,10 @@ public:
 	 */
 	void add(EntityPtr entity) {
 		this->entities.push_back(entity);
+	}
+
+	EntityList& get_list() {
+		return this->entities;
 	}
 
 	/**
@@ -86,7 +90,7 @@ public:
 			return e1_y_point > e2_y_point;
 		});
 		// It's sorting entities based on theirs z and y. If an entity is farther from the player it's displayed first.
-		//Otherwise it displays what is under something first.
+		// Otherwise it displays what is under something first.
 		return result;
 	}
 
