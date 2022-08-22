@@ -1,4 +1,4 @@
-# Flow (IN DEVELOP :/)
+# Flow
 Fatally Lazy On Wednesday - SDL2 based C++ game engine working in 3D space but rendering in fake "isometric" 2d graphics. Engine is standalone header file (.hpp) for C++.
 
 ## Compiling
